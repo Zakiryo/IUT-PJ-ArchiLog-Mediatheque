@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="bserveur">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../Documents/bserveur.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
