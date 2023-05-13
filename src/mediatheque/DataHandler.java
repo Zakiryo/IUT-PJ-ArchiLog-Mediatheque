@@ -1,7 +1,5 @@
 package mediatheque;
 
-import bttp2.Codage;
-
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -15,7 +13,7 @@ public final class DataHandler {
 
     public DataHandler() throws SQLException {
         connection = DriverManager.getConnection(HOST, USER, PASSWORD);
-        this.updateAbonnes();
+        this.setAbonnes();
         this.fetchAllDocuments();
     }
 
@@ -24,39 +22,31 @@ public final class DataHandler {
     }
 
     public void fetchAllDocuments() throws SQLException {
-        documents.clear();
         PreparedStatement psDocs = connection.prepareStatement("""
-        SELECT doc.*, dvd.adulte
-        FROM DOCUMENT doc
-        LEFT JOIN DVD dvd ON doc.numero = dvd.numero
-        """);
+                SELECT doc.*, dvd.adulte
+                FROM DOCUMENT doc
+                LEFT JOIN DVD dvd ON doc.numero = dvd.numero
+                """);
         ResultSet resDocs = psDocs.executeQuery();
-        while(resDocs.next()) {
+        while (resDocs.next()) {
             int numero = resDocs.getInt("numero");
             String titre = resDocs.getString("titre");
             String type = resDocs.getString("type");
             boolean adulte = resDocs.getInt("adulte") == 1;
-
-            System.out.println(numero + " " + titre + " " + type + " " + adulte);
-            switch(type.toLowerCase()) {
-                case "dvd":
-                    documents.add(new DVD(numero, titre, adulte));
-                    break;
-                default:
-                    throw new RuntimeException("Type de document non pris en charge par l'application.");
+            switch (type.toLowerCase()) {
+                case "dvd" -> documents.add(new DVD(numero, titre, adulte));
+                default -> throw new RuntimeException("Type de document non pris en charge par l'application.");
             }
         }
+        psDocs.close();
     }
 
-    public void updateAbonnes() throws SQLException {
-        abonnes.clear();
+    public void setAbonnes() throws SQLException {
         PreparedStatement psAbonnes = connection.prepareStatement("SELECT * FROM ABONNE");
         ResultSet resAbonnes = psAbonnes.executeQuery();
-
         while (resAbonnes.next()) {
             abonnes.add(new Abonne(resAbonnes.getInt("numero"), resAbonnes.getString("nom"), resAbonnes.getDate("date_de_naissance")));
         }
-
         resAbonnes.close();
         psAbonnes.close();
     }
@@ -82,62 +72,12 @@ public final class DataHandler {
         return catalogue;
     }
 
-    // Essayer de factoriser getEmprunteur & getReservataire
-    public static Abonne getEmprunteur(int numero) throws SQLException {
-        PreparedStatement psEmpr = connection.prepareStatement("SELECT EMPRUNTE_PAR FROM DOCUMENT WHERE numero = ?");
-        psEmpr.setInt(1, numero);
-        ResultSet resEmpr = psEmpr.executeQuery();
-        resEmpr.next();
-        int numeroAbonne = resEmpr.getInt("EMPRUNTE_PAR");
-
-        psEmpr.close();
-        resEmpr.close();
-
-        // Si pas de réservataire
-        if(numeroAbonne == 0) {
-            return null;
-        }
-
-        for( Abonne abonne : abonnes) {
-            if(abonne.getNumero() == numeroAbonne) {
-                return abonne;
-            }
-        }
-
-        throw new RuntimeException("Erreur lors de la vérification de l'emprunteur.");
-    }
-
-    public static Abonne getReservataire(int numero) throws SQLException {
-        PreparedStatement psReserv = connection.prepareStatement("SELECT RESERVE_PAR FROM DOCUMENT WHERE numero = ?");
-        psReserv.setInt(1, numero);
-        ResultSet resReserv = psReserv.executeQuery();
-        resReserv.next();
-        int numeroAbonne = resReserv.getInt("RESERVE_PAR");
-
-        psReserv.close();
-        resReserv.close();
-
-        // Si pas de réservataire
-        if(numeroAbonne == 0) {
-            return null;
-        }
-
-        for( Abonne abonne : abonnes) {
-            if(abonne.getNumero() == numeroAbonne) {
-                return abonne;
-            }
-        }
-
-        throw new RuntimeException("Erreur lors de la vérification du réservataire.");
-    }
-
-    public static Abonne getAbonneById(int numeroAbonne) {
-        for (Abonne a : DataHandler.getAbonnes()) {
-            if (a.getNumero() == numeroAbonne) {
+    public static Abonne getAbonneById(int numero) {
+        for (Abonne a : abonnes) {
+            if (a.getNumero() == numero) {
                 return a;
             }
         }
-
         return null;
     }
 }

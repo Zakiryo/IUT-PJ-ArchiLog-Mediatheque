@@ -1,8 +1,7 @@
 package mediatheque;
 
-import exception.DocumentUnavailableException;
+import exception.RestrictionException;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,59 +24,72 @@ public class DVD implements Document {
     }
 
     @Override
-    public Abonne empruntePar() throws SQLException {
-        return DataHandler.getEmprunteur(this.numero);
-    }
-
-    @Override
-    public Abonne reservePar() throws SQLException {
-        return DataHandler.getReservataire(this.numero);
-    }
-
-    @Override
-    synchronized public void reservation(Abonne ab) throws SQLException, DocumentUnavailableException {
-
-        Connection conn = DataHandler.getConnection();
-        conn.setAutoCommit(false);
-
-        PreparedStatement psEmprReserv = conn.prepareStatement("SELECT EMPRUNTE_PAR, RESERVE_PAR FROM DOCUMENT WHERE numero = ? FOR UPDATE");
-        psEmprReserv.setInt(1, numero);
-        ResultSet resEmprReserv = psEmprReserv.executeQuery();
+    public Abonne empruntePar() {
         try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
+            PreparedStatement psEmpruntePar = DataHandler.getConnection().prepareStatement("SELECT EMPRUNTE_PAR FROM DOCUMENT WHERE NUMERO = ?");
+            psEmpruntePar.setInt(1, numero);
+            ResultSet resEmpruntePar = psEmpruntePar.executeQuery();
+            resEmpruntePar.next();
+            for (Abonne a : DataHandler.getAbonnes()) {
+                if (a.getNumero() == resEmpruntePar.getInt("emprunte_par")) {
+                    return a;
+                }
+            }
+            psEmpruntePar.close();
+            return null;
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        resEmprReserv.next();
-        boolean isAvailable = resEmprReserv.getInt("EMPRUNTE_PAR") == 0 && resEmprReserv.getInt("RESERVE_PAR") == 0;
+    }
 
-
-        // Si pas de réservataire
-        if (!isAvailable) {
-            psEmprReserv.close();
-            resEmprReserv.close();
-            throw new DocumentUnavailableException();
+    @Override
+    public Abonne reservePar() {
+        try {
+            PreparedStatement psReservePar = DataHandler.getConnection().prepareStatement("SELECT RESERVE_PAR FROM DOCUMENT WHERE NUMERO = ?");
+            psReservePar.setInt(1, numero);
+            ResultSet resReservePar = psReservePar.executeQuery();
+            resReservePar.next();
+            for (Abonne a : DataHandler.getAbonnes()) {
+                if (a.getNumero() == resReservePar.getInt("reserve_par")) {
+                    return a;
+                }
+            }
+            psReservePar.close();
+            return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
+    }
 
-        PreparedStatement psReservation = conn.prepareStatement("UPDATE DOCUMENT SET RESERVE_PAR = ? WHERE NUMERO = ?");
-        psReservation.setInt(1, ab.getNumero());
-        psReservation.setInt(2, numero);
-        psReservation.executeUpdate();
-        conn.commit();
-        conn.setAutoCommit(true);
-
-        psEmprReserv.close();
-        resEmprReserv.close();
-        psReservation.close();
+    @Override
+    synchronized public void reservation(Abonne ab) throws RestrictionException {
+        assert (reservePar() == null && empruntePar() == null);
+        try {
+            PreparedStatement psReversation = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET RESERVE_PAR = ? WHERE NUMERO = ?");
+            psReversation.setInt(1, ab.getNumero());
+            psReversation.setInt(2, numero);
+            psReversation.executeUpdate();
+            psReversation.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // A faire
     @Override
-    public void emprunt(Abonne ab) throws SQLException, DocumentUnavailableException {
+    public void emprunt(Abonne ab) throws RestrictionException {
+        assert (reservePar() == null || reservePar() == ab);
     }
 
-    // A faire
     @Override
     public void retour() {
+        try {
+            PreparedStatement psRetour = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET RESERVE_PAR = NULL, EMPRUNTE_PAR = NULL WHERE NUMERO = ?");
+            psRetour.setInt(1, numero);
+            psRetour.executeUpdate();
+            psRetour.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -1,6 +1,6 @@
 package mediatheque;
 
-import exception.DocumentUnavailableException;
+import exception.RestrictionException;
 
 import java.sql.SQLException;
 
@@ -9,15 +9,15 @@ public interface Document {
     int numero();
 
     // return null si pas emprunté ou pas réservé
-    Abonne empruntePar() throws SQLException; // Abonné qui a emprunté ce document
+    Abonne empruntePar();
 
-    Abonne reservePar() throws SQLException; // Abonné qui a réservé ce document
+    Abonne reservePar();
 
     // precondition ni réservé ni emprunté
-    void reservation(Abonne ab) throws SQLException, DocumentUnavailableException;
+    void reservation(Abonne ab) throws RestrictionException;
 
     // precondition libre ou réservé par l’abonné qui vient emprunter
-    void emprunt(Abonne ab) throws SQLException, DocumentUnavailableException;
+    void emprunt(Abonne ab) throws RestrictionException;
 
     // retour d’un document ou annulation d‘une réservation
     void retour();

@@ -1,7 +1,7 @@
 package services;
 
 import bttp2.Codage;
-import exception.DocumentUnavailableException;
+import exception.RestrictionException;
 import mediatheque.Abonne;
 import mediatheque.DataHandler;
 import mediatheque.Document;
@@ -9,8 +9,6 @@ import serveur.Service;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.sql.SQLException;
 
 public class ServiceReservation extends Service implements Runnable {
@@ -23,7 +21,7 @@ public class ServiceReservation extends Service implements Runnable {
         try {
             getOut().println(Codage.coder("Bienvenue au service de réservation ! Voici notre catalogue :\n" + DataHandler.getCatalogue() + "Veuillez saisir votre numéro d'abonné\n" + "> "));
 
-            Abonne abonne = null;
+            Abonne abonne;
             int numeroAbonne;
 
             try {
@@ -55,22 +53,28 @@ public class ServiceReservation extends Service implements Runnable {
 
             for (Document d : DataHandler.getDocuments()) {
                 if (d.numero() == numeroDocument) {
-                    try {
+                    if (d.reservePar() != null) {
+                        getOut().println(Codage.coder("Ce document est déjà réservé."));
+                        getClient().close();
+                        return;
+                    } else if (d.empruntePar() != null) {
+                        getOut().println(Codage.coder("Ce document est déjà emprunté."));
+                        getClient().close();
+                        return;
+                    } else {
                         d.reservation(abonne);
-                    } catch (DocumentUnavailableException e) {
-                        getOut().println(Codage.coder("Le document a déjà été réservé ou emprunté"));
+                        getOut().println(Codage.coder("Le document a bien été réservé ! Vous avez deux heures pour le retirer à la borne emprunt de la médiathèque."));
                         getClient().close();
                         return;
                     }
                 }
             }
-
-            getOut().println(Codage.coder("Le document a bien été réservé ! Vous avez deux heures pour le retirer à la borne emprunt de la médiathèque."));
+            getOut().println(Codage.coder("Ce numéro de document n'existe pas."));
             getClient().close();
-        } catch (SQLException e) {
+        } catch (SQLException | RestrictionException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
-            System.out.println("Un utilisateur a interrompu sa connexion avec le serveur. / Une erreur est survenue.");
+            System.out.println("Un utilisateur a interrompu sa connexion avec le serveur.");
         }
     }
 }

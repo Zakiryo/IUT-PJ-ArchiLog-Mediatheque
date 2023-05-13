@@ -16,7 +16,7 @@ public class ServiceRetour extends Service implements Runnable {
     @Override
     public void run() {
         try {
-            getOut().println(Codage.coder("Bienvenue au service de retour !\n Veuillez saisir votre numéro de document à retourner : \n" + "> "));
+            getOut().println(Codage.coder("Bienvenue au service de retour !\n Veuillez saisir le numéro du document à retourner : \n" + "> "));
             int numeroDoc;
 
             try {
@@ -27,17 +27,21 @@ public class ServiceRetour extends Service implements Runnable {
                 return;
             }
 
-            for(Document doc : DataHandler.getDocuments()) {
-                if(doc.numero() == numeroDoc) {
-                    doc.retour();
+            for (Document doc : DataHandler.getDocuments()) {
+                if (doc.numero() == numeroDoc) {
+                    if (doc.empruntePar() == null || doc.reservePar() == null) {
+                        getOut().println(Codage.coder("Ce document n'est ni réservé ni emprunté."));
+                    } else {
+                        doc.retour();
+                        getOut().println(Codage.coder("Le document a bien été retourné."));
+                    }
                     getClient().close();
-                    getOut().println(Codage.coder("Document rendu !"));
                     return;
                 }
             }
 
             getClient().close();
-            getOut().println(Codage.coder("Désolé, ce numéro de document n'est pas enregistré."));
+            getOut().println(Codage.coder("Désolé, ce numéro de document n'existe pas."));
         } catch (IOException e) {
             System.out.println("Un utilisateur a interrompu sa connexion avec le serveur. / Une erreur est survenue.");
         }

@@ -1,7 +1,6 @@
 package services;
 
 import bttp2.Codage;
-import exception.DocumentUnavailableException;
 import mediatheque.Abonne;
 import mediatheque.DataHandler;
 import mediatheque.Document;
@@ -18,6 +17,7 @@ public class ServiceEmprunt extends Service implements Runnable {
 
     @Override
     public void run() {
+        /*
         try {
             getOut().println(Codage.coder("Bienvenue au service d'emprunt ! Voici notre catalogue :\n" + DataHandler.getCatalogue() + "Veuillez saisir votre numéro d'abonné afin d'emprunter\n" + "> "));
 
@@ -74,5 +74,7 @@ public class ServiceEmprunt extends Service implements Runnable {
         } catch (IOException e) {
             System.out.println("Un utilisateur a interrompu sa connexion avec le serveur. / Une erreur est survenue.");
         }
+
+         */
     }
 }
