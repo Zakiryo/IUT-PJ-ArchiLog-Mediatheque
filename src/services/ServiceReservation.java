@@ -31,7 +31,7 @@ public class ServiceReservation extends Service implements Runnable {
             }
             abonne = DataHandler.getAbonneById(numeroAbonne);
             if (abonne == null) {
-                getOut().println(Codage.coder("Désolé, ce numéro d'abonné n'est pas enregistré."));
+                getOut().println(Codage.coder("Ce numéro d'abonné n'est pas enregistré."));
                 getClient().close();
                 return;
             }
@@ -64,10 +64,8 @@ public class ServiceReservation extends Service implements Runnable {
             }
             getOut().println(Codage.coder("Ce numéro de document n'existe pas."));
             getClient().close();
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
-        } catch (IOException e) {
-            System.out.println("Un utilisateur a interrompu sa connexion avec le serveur.");
         } catch (RestrictionException e) {
             getOut().println(Codage.coder(e.getMessage()));
         }

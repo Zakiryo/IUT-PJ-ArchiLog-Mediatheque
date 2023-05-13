@@ -26,11 +26,10 @@ public final class DataHandler {
         ResultSet resDocs = psDocs.executeQuery();
         while (resDocs.next()) {
             int numero = resDocs.getInt("numero");
-            String titre = resDocs.getString("titre");
             String type = resDocs.getString("type");
             boolean adulte = resDocs.getInt("adulte") == 1;
             switch (type.toLowerCase()) {
-                case "dvd" -> documents.add(new DVD(numero, titre, adulte));
+                case "dvd" -> documents.add(new DVD(numero, adulte));
                 default -> throw new RuntimeException("Type de document non pris en charge par l'application.");
             }
         }
