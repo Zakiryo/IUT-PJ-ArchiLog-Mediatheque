@@ -64,6 +64,9 @@ public class DVD implements Document {
     @Override
     synchronized public void reservation(Abonne ab) throws RestrictionException {
         assert (reservePar() == null && empruntePar() == null);
+        if (adulte && ab.getAge() < 18) {
+            throw new RestrictionException("Vous n'avez pas l'âge requis pour réserver ce document.");
+        }
         try {
             PreparedStatement psReversation = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET RESERVE_PAR = ? WHERE NUMERO = ?");
             psReversation.setInt(1, ab.getNumero());
@@ -75,10 +78,21 @@ public class DVD implements Document {
         }
     }
 
-    // A faire
     @Override
     public void emprunt(Abonne ab) throws RestrictionException {
         assert (reservePar() == null || reservePar() == ab);
+        if (adulte && ab.getAge() < 18) {
+            throw new RestrictionException("Vous n'avez pas l'âge requis pour emprunter ce document.");
+        }
+        try {
+            PreparedStatement psEmprunt = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET EMPRUNTE_PAR = ?, RESERVE_PAR = NULL WHERE NUMERO = ?");
+            psEmprunt.setInt(1, ab.getNumero());
+            psEmprunt.setInt(2, numero);
+            psEmprunt.executeUpdate();
+            psEmprunt.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

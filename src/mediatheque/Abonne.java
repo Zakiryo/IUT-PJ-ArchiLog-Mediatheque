@@ -21,7 +21,10 @@ public class Abonne {
         return numero;
     }
 
-    public Date getDateNaissance() {
-        return dateNaissance;
+    public int getAge() {
+        Date current = new Date();
+        long difference = current.getTime() - dateNaissance.getTime();
+        long age = difference / (365 * 24 * 60 * 60 * 1000L);
+        return (int) age;
     }
 }
