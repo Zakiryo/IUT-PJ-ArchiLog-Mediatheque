@@ -1,11 +1,9 @@
-import mediatheque.DataHandler;
 import serveur.Serveur;
 import services.ServiceEmprunt;
 import services.ServiceReservation;
 import services.ServiceRetour;
 
 import java.io.IOException;
-import java.net.SocketException;
 
 public class Application {
     public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {

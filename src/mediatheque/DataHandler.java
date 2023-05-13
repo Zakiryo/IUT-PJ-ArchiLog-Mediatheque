@@ -22,11 +22,7 @@ public final class DataHandler {
     }
 
     public void fetchAllDocuments() throws SQLException {
-        PreparedStatement psDocs = connection.prepareStatement("""
-                SELECT doc.*, dvd.adulte
-                FROM DOCUMENT doc
-                LEFT JOIN DVD dvd ON doc.numero = dvd.numero
-                """);
+        PreparedStatement psDocs = connection.prepareStatement("SELECT doc.*, dvd.adulte FROM DOCUMENT doc LEFT JOIN DVD dvd ON doc.numero = dvd.numero");
         ResultSet resDocs = psDocs.executeQuery();
         while (resDocs.next()) {
             int numero = resDocs.getInt("numero");
@@ -38,6 +34,7 @@ public final class DataHandler {
                 default -> throw new RuntimeException("Type de document non pris en charge par l'application.");
             }
         }
+        resDocs.close();
         psDocs.close();
     }
 
@@ -69,6 +66,8 @@ public final class DataHandler {
                     .append(resTitres.getString("titre"))
                     .append("\n");
         }
+        resTitres.close();
+        psTitres.close();
         return catalogue;
     }
 

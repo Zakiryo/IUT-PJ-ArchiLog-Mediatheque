@@ -2,8 +2,6 @@ package mediatheque;
 
 import exception.RestrictionException;
 
-import java.sql.SQLException;
-
 public interface Document {
     // return numéro du document
     int numero();

@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DVD implements Document {
-
     private final int numero;
     private final String titre;
     private final boolean adulte;
@@ -35,6 +34,7 @@ public class DVD implements Document {
                     return a;
                 }
             }
+            resEmpruntePar.close();
             psEmpruntePar.close();
             return null;
         } catch (SQLException e) {
@@ -54,6 +54,7 @@ public class DVD implements Document {
                     return a;
                 }
             }
+            resReservePar.close();
             psReservePar.close();
             return null;
         } catch (SQLException e) {
