@@ -1,6 +1,7 @@
 package services;
 
 import bttp2.Codage;
+import exception.RestrictionException;
 import mediatheque.Abonne;
 import mediatheque.DataHandler;
 import mediatheque.Document;
@@ -17,7 +18,6 @@ public class ServiceEmprunt extends Service implements Runnable {
 
     @Override
     public void run() {
-        /*
         try {
             getOut().println(Codage.coder("Bienvenue au service d'emprunt ! Voici notre catalogue :\n" + DataHandler.getCatalogue() + "Veuillez saisir votre numéro d'abonné afin d'emprunter\n" + "> "));
 
@@ -53,10 +53,16 @@ public class ServiceEmprunt extends Service implements Runnable {
 
             for(Document doc : DataHandler.getDocuments()) {
                 if(doc.numero() == numeroDocument) {
+                    if(doc.reservePar() != null) {
+                        getOut().println(Codage.coder("Ce document est déjà emprunté."));
+                        getClient().close();
+                        return;
+                    }
+
                     try {
                         doc.emprunt(abonne);
-                    } catch (DocumentUnavailableException e) {
-                        getOut().println(Codage.coder("Le document a déjà été réservé ou emprunté"));
+                    } catch (RestrictionException e) {
+                        getOut().println(Codage.coder(e.getMessage()));
                         getClient().close();
                         return;
                     }
@@ -74,7 +80,5 @@ public class ServiceEmprunt extends Service implements Runnable {
         } catch (IOException e) {
             System.out.println("Un utilisateur a interrompu sa connexion avec le serveur. / Une erreur est survenue.");
         }
-
-         */
     }
 }

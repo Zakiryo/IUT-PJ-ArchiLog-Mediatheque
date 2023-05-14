@@ -111,7 +111,10 @@ public class DVD implements Document {
 
         try {
             synchronized (DataHandler.getConnection()) {
-                assert (reservePar() == null || reservePar() == ab);
+                // Demander au prof si le if throw est pas mieux / suffit dans notre situation
+                // assert (reservePar() == null || reservePar() == ab);
+                if(reservePar() != null || reservePar() != ab) throw new RestrictionException("Le document est déjà réservé/emprunté.");
+
                 psEmprunt = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET EMPRUNTE_PAR = ?, RESERVE_PAR = NULL WHERE NUMERO = ?");
                 psEmprunt.setInt(1, ab.getNumero());
                 psEmprunt.setInt(2, numero);
