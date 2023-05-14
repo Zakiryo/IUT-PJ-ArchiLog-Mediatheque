@@ -81,9 +81,7 @@ public class DVD implements Document {
 
     @Override
     public void emprunt(Abonne ab) throws RestrictionException {
-        if (reservePar() != null && reservePar() != ab) {
-            throw new RestrictionException("Ce document est réservé par un autre abonné.");
-        }
+        assert (reservePar() == null || reservePar() == ab);
         if (adulte && ab.getAge() < 18) {
             throw new RestrictionException("Vous n'avez pas l'âge requis pour emprunter ce document.");
         }
