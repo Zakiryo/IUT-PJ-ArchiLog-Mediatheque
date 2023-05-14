@@ -23,20 +23,19 @@ public class DVD implements Document {
     @Override
     public Abonne empruntePar() {
         try {
-            synchronized (this) {
-                PreparedStatement psEmpruntePar = DataHandler.getConnection().prepareStatement("SELECT EMPRUNTE_PAR FROM DOCUMENT WHERE NUMERO = ?");
-                psEmpruntePar.setInt(1, numero);
-                ResultSet resEmpruntePar = psEmpruntePar.executeQuery();
-                resEmpruntePar.next();
-                for (Abonne a : DataHandler.getAbonnes()) {
-                    if (a.getNumero() == resEmpruntePar.getInt("emprunte_par")) {
-                        return a;
-                    }
-                }
+            PreparedStatement psEmpruntePar = DataHandler.getConnection().prepareStatement("SELECT EMPRUNTE_PAR FROM DOCUMENT WHERE NUMERO = ?");
+            psEmpruntePar.setInt(1, numero);
+            ResultSet resEmpruntePar = psEmpruntePar.executeQuery();
+            if (resEmpruntePar.next()) {
+                int emprunteParId = resEmpruntePar.getInt("EMPRUNTE_PAR");
+                Abonne empruntePar = DataHandler.getAbonneById(emprunteParId);
                 resEmpruntePar.close();
                 psEmpruntePar.close();
-                return null;
+                return empruntePar;
             }
+            resEmpruntePar.close();
+            psEmpruntePar.close();
+            return null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -45,20 +44,19 @@ public class DVD implements Document {
     @Override
     public Abonne reservePar() {
         try {
-            synchronized (this) {
-                PreparedStatement psReservePar = DataHandler.getConnection().prepareStatement("SELECT RESERVE_PAR FROM DOCUMENT WHERE NUMERO = ?");
-                psReservePar.setInt(1, numero);
-                ResultSet resReservePar = psReservePar.executeQuery();
-                resReservePar.next();
-                for (Abonne a : DataHandler.getAbonnes()) {
-                    if (a.getNumero() == resReservePar.getInt("reserve_par")) {
-                        return a;
-                    }
-                }
+            PreparedStatement psReservePar = DataHandler.getConnection().prepareStatement("SELECT RESERVE_PAR FROM DOCUMENT WHERE NUMERO = ?");
+            psReservePar.setInt(1, numero);
+            ResultSet resReservePar = psReservePar.executeQuery();
+            if (resReservePar.next()) {
+                int reserveParId = resReservePar.getInt("RESERVE_PAR");
+                Abonne reservePar = DataHandler.getAbonneById(reserveParId);
                 resReservePar.close();
                 psReservePar.close();
-                return null;
+                return reservePar;
             }
+            resReservePar.close();
+            psReservePar.close();
+            return null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -71,13 +69,11 @@ public class DVD implements Document {
             throw new RestrictionException("Vous n'avez pas l'âge requis pour réserver ce document.");
         }
         try {
-            synchronized (this) {
-                PreparedStatement psReversation = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET RESERVE_PAR = ? WHERE NUMERO = ?");
-                psReversation.setInt(1, ab.getNumero());
-                psReversation.setInt(2, numero);
-                psReversation.executeUpdate();
-                psReversation.close();
-            }
+            PreparedStatement psReservation = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET RESERVE_PAR = ? WHERE NUMERO = ?");
+            psReservation.setInt(1, ab.getNumero());
+            psReservation.setInt(2, numero);
+            psReservation.executeUpdate();
+            psReservation.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -85,18 +81,18 @@ public class DVD implements Document {
 
     @Override
     public void emprunt(Abonne ab) throws RestrictionException {
-        assert (reservePar() == null || reservePar() == ab);
+        if (reservePar() != null && reservePar() != ab) {
+            throw new RestrictionException("Ce document est réservé par un autre abonné.");
+        }
         if (adulte && ab.getAge() < 18) {
             throw new RestrictionException("Vous n'avez pas l'âge requis pour emprunter ce document.");
         }
         try {
-            synchronized (this) {
-                PreparedStatement psEmprunt = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET EMPRUNTE_PAR = ?, RESERVE_PAR = NULL WHERE NUMERO = ?");
-                psEmprunt.setInt(1, ab.getNumero());
-                psEmprunt.setInt(2, numero);
-                psEmprunt.executeUpdate();
-                psEmprunt.close();
-            }
+            PreparedStatement psEmprunt = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET EMPRUNTE_PAR = ?, RESERVE_PAR = NULL WHERE NUMERO = ?");
+            psEmprunt.setInt(1, ab.getNumero());
+            psEmprunt.setInt(2, numero);
+            psEmprunt.executeUpdate();
+            psEmprunt.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -105,12 +101,10 @@ public class DVD implements Document {
     @Override
     public void retour() {
         try {
-            synchronized (this) {
-                PreparedStatement psRetour = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET RESERVE_PAR = NULL, EMPRUNTE_PAR = NULL WHERE NUMERO = ?");
-                psRetour.setInt(1, numero);
-                psRetour.executeUpdate();
-                psRetour.close();
-            }
+            PreparedStatement psRetour = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET RESERVE_PAR = NULL, EMPRUNTE_PAR = NULL WHERE NUMERO = ?");
+            psRetour.setInt(1, numero);
+            psRetour.executeUpdate();
+            psRetour.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
