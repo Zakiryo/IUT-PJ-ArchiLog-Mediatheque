@@ -9,7 +9,6 @@ import serveur.Service;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.sql.SQLException;
 
 public class ServiceEmprunt extends Service implements Runnable {
     public ServiceEmprunt(Socket socket) throws IOException {
@@ -20,10 +19,8 @@ public class ServiceEmprunt extends Service implements Runnable {
     public void run() {
         try {
             getOut().println(Codage.coder("Bienvenue au service d'emprunt ! Voici notre catalogue :\n" + DataHandler.getCatalogue() + "Veuillez saisir votre numéro d'abonné afin d'emprunter\n" + "> "));
-
-            Abonne abonne = null;
+            Abonne abonne;
             int numeroAbonne;
-
             try {
                 numeroAbonne = Integer.parseInt(getIn().readLine());
             } catch (NumberFormatException e) {
@@ -31,18 +28,14 @@ public class ServiceEmprunt extends Service implements Runnable {
                 getClient().close();
                 return;
             }
-
             abonne = DataHandler.getAbonneById(numeroAbonne);
-
             if (abonne == null) {
-                getOut().println(Codage.coder("Désolé, ce numéro d'abonné n'est pas enregistré."));
+                getOut().println(Codage.coder("Ce numéro d'abonné n'est pas enregistré."));
                 getClient().close();
                 return;
             }
-
             getOut().println(Codage.coder("Veuillez maintenant saisir le numéro du document que vous souhaitez emprunter\n" + "> "));
             int numeroDocument;
-
             try {
                 numeroDocument = Integer.parseInt(getIn().readLine());
             } catch (NumberFormatException e) {
@@ -50,15 +43,13 @@ public class ServiceEmprunt extends Service implements Runnable {
                 getClient().close();
                 return;
             }
-
-            for(Document doc : DataHandler.getDocuments()) {
-                if(doc.numero() == numeroDocument) {
-                    if(doc.empruntePar() != null) {
+            for (Document doc : DataHandler.getDocuments()) {
+                if (doc.numero() == numeroDocument) {
+                    if (doc.empruntePar() != null) {
                         getOut().println(Codage.coder("Ce document est déjà emprunté."));
                         getClient().close();
                         return;
                     }
-
                     try {
                         doc.emprunt(abonne);
                     } catch (RestrictionException e) {
@@ -66,17 +57,13 @@ public class ServiceEmprunt extends Service implements Runnable {
                         getClient().close();
                         return;
                     }
-
-                    getOut().println(Codage.coder("Document emprunté, merci pour votre emprunt !"));
+                    getOut().println(Codage.coder("Le document a bien été emprunté."));
                     getClient().close();
                     return;
                 }
             }
-
             getOut().println(Codage.coder("Document introuvable."));
             getClient().close();
-        } catch(SQLException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             System.out.println("Un utilisateur a interrompu sa connexion avec le serveur. / Une erreur est survenue.");
         }

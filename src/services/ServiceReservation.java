@@ -72,7 +72,7 @@ public class ServiceReservation extends Service implements Runnable {
 
             getOut().println(Codage.coder("Ce numéro de document n'existe pas."));
             getClient().close();
-        } catch (SQLException | IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (RestrictionException e) {
             getOut().println(Codage.coder(e.getMessage()));

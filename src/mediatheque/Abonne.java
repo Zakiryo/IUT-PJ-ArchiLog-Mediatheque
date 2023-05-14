@@ -1,15 +1,14 @@
 package mediatheque;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.Period;
 
 public class Abonne {
     private final int numero;
-    private final String nom;
-    private final Date dateNaissance;
+    private final LocalDate dateNaissance;
 
-    public Abonne(int numero, String nom, Date dateNaissance) {
+    public Abonne(int numero, LocalDate dateNaissance) {
         this.numero = numero;
-        this.nom = nom;
         this.dateNaissance = dateNaissance;
     }
 
@@ -18,9 +17,8 @@ public class Abonne {
     }
 
     public int getAge() {
-        Date current = new Date();
-        long difference = current.getTime() - dateNaissance.getTime();
-        long age = difference / (365 * 24 * 60 * 60 * 1000L);
-        return (int) age;
+        LocalDate currentDate = LocalDate.now();
+        Period age = Period.between(dateNaissance, currentDate);
+        return age.getYears();
     }
 }
