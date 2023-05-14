@@ -19,9 +19,11 @@ public class ServiceReservation extends Service implements Runnable {
     @Override
     public void run() {
         try {
-            getOut().println(Codage.coder("Bienvenue au service de réservation ! Voici notre catalogue :\n" + DataHandler.getCatalogue() + "Veuillez saisir votre numéro d'abonné\n" + "> "));
             Abonne abonne;
             int numeroAbonne;
+
+            getOut().println(Codage.coder("Bienvenue au service de réservation ! Voici notre catalogue :\n" + DataHandler.getCatalogue() + "Veuillez saisir votre numéro d'abonné\n" + "> "));
+
             try {
                 numeroAbonne = Integer.parseInt(getIn().readLine());
             } catch (NumberFormatException e) {
@@ -29,14 +31,18 @@ public class ServiceReservation extends Service implements Runnable {
                 getClient().close();
                 return;
             }
+
             abonne = DataHandler.getAbonneById(numeroAbonne);
+
             if (abonne == null) {
                 getOut().println(Codage.coder("Ce numéro d'abonné n'est pas enregistré."));
                 getClient().close();
                 return;
             }
+
             getOut().println(Codage.coder("Veuillez maintenant saisir le numéro du document que vous souhaitez réserver\n" + "> "));
             int numeroDocument;
+
             try {
                 numeroDocument = Integer.parseInt(getIn().readLine());
             } catch (NumberFormatException e) {
@@ -44,6 +50,7 @@ public class ServiceReservation extends Service implements Runnable {
                 getClient().close();
                 return;
             }
+
             for (Document d : DataHandler.getDocuments()) {
                 if (d.numero() == numeroDocument) {
                     if (d.reservePar() != null) {
@@ -62,6 +69,7 @@ public class ServiceReservation extends Service implements Runnable {
                     }
                 }
             }
+
             getOut().println(Codage.coder("Ce numéro de document n'existe pas."));
             getClient().close();
         } catch (SQLException | IOException e) {

@@ -13,7 +13,7 @@ public final class DataHandler {
 
     public DataHandler() throws SQLException {
         connection = DriverManager.getConnection(HOST, USER, PASSWORD);
-        this.setAbonnes();
+        this.fetchAbonnes();
         this.fetchAllDocuments();
     }
 
@@ -22,8 +22,14 @@ public final class DataHandler {
     }
 
     public void fetchAllDocuments() throws SQLException {
-        PreparedStatement psDocs = connection.prepareStatement("SELECT doc.*, dvd.adulte FROM DOCUMENT doc LEFT JOIN DVD dvd ON doc.numero = dvd.numero");
-        ResultSet resDocs = psDocs.executeQuery();
+        PreparedStatement psDocs;
+        ResultSet resDocs;
+
+        synchronized (connection) {
+            psDocs = connection.prepareStatement("SELECT doc.*, dvd.adulte FROM DOCUMENT doc LEFT JOIN DVD dvd ON doc.numero = dvd.numero");
+            resDocs = psDocs.executeQuery();
+        }
+
         while (resDocs.next()) {
             int numero = resDocs.getInt("numero");
             String type = resDocs.getString("type");
@@ -33,13 +39,20 @@ public final class DataHandler {
                 default -> throw new RuntimeException("Type de document non pris en charge par l'application.");
             }
         }
+
         resDocs.close();
         psDocs.close();
     }
 
-    public void setAbonnes() throws SQLException {
-        PreparedStatement psAbonnes = connection.prepareStatement("SELECT * FROM ABONNE");
-        ResultSet resAbonnes = psAbonnes.executeQuery();
+    public void fetchAbonnes() throws SQLException {
+        PreparedStatement psAbonnes;
+        ResultSet resAbonnes;
+
+        synchronized (connection) {
+            psAbonnes = connection.prepareStatement("SELECT * FROM ABONNE");
+            resAbonnes = psAbonnes.executeQuery();
+        }
+
         while (resAbonnes.next()) {
             abonnes.add(new Abonne(resAbonnes.getInt("numero"), resAbonnes.getString("nom"), resAbonnes.getDate("date_de_naissance")));
         }
@@ -57,16 +70,24 @@ public final class DataHandler {
 
     public static StringBuilder getCatalogue() throws SQLException {
         StringBuilder catalogue = new StringBuilder();
-        PreparedStatement psTitres = connection.prepareStatement("SELECT NUMERO, TITRE, TYPE FROM DOCUMENT");
-        ResultSet resTitres = psTitres.executeQuery();
+        PreparedStatement psTitres;
+        ResultSet resTitres;
+
+        synchronized (connection) {
+            psTitres = connection.prepareStatement("SELECT NUMERO, TITRE, TYPE FROM DOCUMENT");
+            resTitres = psTitres.executeQuery();
+        }
+
         while (resTitres.next()) {
             catalogue.append(resTitres.getString("type").toUpperCase()).append(" : ")
                     .append("N°").append(resTitres.getInt("numero")).append(" - ")
                     .append(resTitres.getString("titre"))
                     .append("\n");
         }
+
         resTitres.close();
         psTitres.close();
+
         return catalogue;
     }
 

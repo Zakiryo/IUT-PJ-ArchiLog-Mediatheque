@@ -18,6 +18,7 @@ public class ServiceRetour extends Service implements Runnable {
         try {
             getOut().println(Codage.coder("Bienvenue au service de retour !\nVeuillez saisir le numéro du document à retourner\n" + "> "));
             int numeroDoc;
+
             try {
                 numeroDoc = Integer.parseInt(getIn().readLine());
             } catch (NumberFormatException e) {
@@ -25,6 +26,7 @@ public class ServiceRetour extends Service implements Runnable {
                 getClient().close();
                 return;
             }
+
             for (Document doc : DataHandler.getDocuments()) {
                 if (doc.numero() == numeroDoc) {
                     if (doc.empruntePar() == null && doc.reservePar() == null) {
@@ -33,10 +35,12 @@ public class ServiceRetour extends Service implements Runnable {
                         doc.retour();
                         getOut().println(Codage.coder("Le document a bien été retourné."));
                     }
+
                     getClient().close();
                     return;
                 }
             }
+
             getOut().println(Codage.coder("Ce numéro de document n'existe pas."));
             getClient().close();
         } catch (IOException e) {
