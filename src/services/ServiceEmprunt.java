@@ -53,7 +53,7 @@ public class ServiceEmprunt extends Service implements Runnable {
 
             for(Document doc : DataHandler.getDocuments()) {
                 if(doc.numero() == numeroDocument) {
-                    if(doc.reservePar() != null) {
+                    if(doc.empruntePar() != null) {
                         getOut().println(Codage.coder("Ce document est déjà emprunté."));
                         getClient().close();
                         return;
