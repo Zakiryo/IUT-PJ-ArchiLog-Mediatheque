@@ -1,8 +1,16 @@
-package mediatheque;
+package Data;
+
+import mediatheque.Abonne;
+import mediatheque.DVD;
+import mediatheque.Document;
+import tasks.AnnulationReservation;
+import Data.TimerData;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.Date;
 
 public final class DataHandler {
     private static final String HOST = "jdbc:oracle:thin:@localhost:1521:XE";
@@ -12,8 +20,12 @@ public final class DataHandler {
     private static final List<Document> documents = new ArrayList<>();
     private static final List<Abonne> abonnes = new ArrayList<>();
 
+    private static HashMap<Integer, TimerData> activeTimers;
+
     public DataHandler() throws SQLException {
+        activeTimers = new HashMap<>();
         connection = DriverManager.getConnection(HOST, USER, PASSWORD);
+
         fetchAbonnes();
         fetchAllDocuments();
     }
@@ -72,5 +84,31 @@ public final class DataHandler {
             System.out.println("Erreur lors de la récupération du catalogue : " + e.getMessage());
         }
         return catalogue;
+    }
+
+    public static void validReservation(int documentID) {
+        if(activeTimers.containsKey(documentID)) {
+            activeTimers.get(documentID).getTimer().cancel();
+            activeTimers.remove(documentID);
+            System.out.println("Le document réservé numéro " + documentID + " a été emprunté dans les temps.");
+        }
+    }
+
+    public static void reservationTimerTaskStart(int documentID) {
+        Timer timer = new Timer();
+        LocalDateTime reservationExpiration = LocalDateTime.now().plusHours(2);
+        TimerTask task = new AnnulationReservation(documentID, reservationExpiration);
+
+        Date scheduledExpirationDate = Date.from(reservationExpiration.atZone(ZoneId.systemDefault()).toInstant());
+        timer.schedule(task, scheduledExpirationDate);
+        activeTimers.put(documentID, new TimerData(timer, reservationExpiration));
+    }
+
+    public static void removeTimer(int documentID) {
+        activeTimers.remove(documentID);
+    }
+
+    public static LocalDateTime getReservationExpirationDate(int documentID) {
+        return activeTimers.get(documentID).getDate();
     }
 }

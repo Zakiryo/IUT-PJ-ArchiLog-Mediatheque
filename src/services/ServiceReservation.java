@@ -3,13 +3,13 @@ package services;
 import bttp2.Codage;
 import exception.RestrictionException;
 import mediatheque.Abonne;
-import mediatheque.DataHandler;
+import Data.DataHandler;
 import mediatheque.Document;
 import serveur.Service;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 public class ServiceReservation extends Service implements Runnable {
     public ServiceReservation(Socket socket) throws IOException {
@@ -51,18 +51,24 @@ public class ServiceReservation extends Service implements Runnable {
                 return;
             }
 
-            for (Document d : DataHandler.getDocuments()) {
-                if (d.numero() == numeroDocument) {
-                    if (d.reservePar() != null) {
-                        getOut().println(Codage.coder("Ce document est déjà réservé."));
+            for (Document doc : DataHandler.getDocuments()) {
+                if (doc.numero() == numeroDocument) {
+                    if (doc.reservePar() != null) {
+                        LocalDateTime availabilityTime = DataHandler.getReservationExpirationDate(doc.numero());
+                        String alreadyBorrowedResponse = "Ce document est réservé. Il sera disponible à "
+                                + availabilityTime.getHour()
+                                + "h"
+                                + availabilityTime.getMinute();
+                        getOut().println(Codage.coder(alreadyBorrowedResponse));
                         getClient().close();
                         return;
-                    } else if (d.empruntePar() != null) {
+                    } else if (doc.empruntePar() != null) {
                         getOut().println(Codage.coder("Ce document est déjà emprunté."));
                         getClient().close();
                         return;
                     } else {
-                        d.reservation(abonne);
+                        doc.reservation(abonne);
+                        DataHandler.reservationTimerTaskStart(doc.numero());
                         getOut().println(Codage.coder("Le document a bien été réservé ! Vous avez deux heures pour le retirer à la borne emprunt de la médiathèque."));
                         getClient().close();
                         return;

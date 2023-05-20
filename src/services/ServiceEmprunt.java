@@ -3,12 +3,13 @@ package services;
 import bttp2.Codage;
 import exception.RestrictionException;
 import mediatheque.Abonne;
-import mediatheque.DataHandler;
+import Data.DataHandler;
 import mediatheque.Document;
 import serveur.Service;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.time.LocalDateTime;
 
 public class ServiceEmprunt extends Service implements Runnable {
     public ServiceEmprunt(Socket socket) throws IOException {
@@ -50,6 +51,16 @@ public class ServiceEmprunt extends Service implements Runnable {
                         getClient().close();
                         return;
                     }
+                    if(doc.reservePar() != null && doc.reservePar() != abonne) {
+                        LocalDateTime availabilityTime = DataHandler.getReservationExpirationDate(doc.numero());
+                        String alreadyBorrowedResponse = "Ce document est réservé. Il sera disponible à "
+                                + availabilityTime.getHour()
+                                + "h"
+                                + availabilityTime.getMinute();
+                        getOut().println(Codage.coder(alreadyBorrowedResponse));
+                        getClient().close();
+                        return;
+                    }
                     try {
                         doc.emprunt(abonne);
                     } catch (RestrictionException e) {
@@ -57,6 +68,7 @@ public class ServiceEmprunt extends Service implements Runnable {
                         getClient().close();
                         return;
                     }
+                    DataHandler.validReservation(doc.numero());
                     getOut().println(Codage.coder("Le document a bien été emprunté."));
                     getClient().close();
                     return;

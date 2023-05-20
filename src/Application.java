@@ -10,6 +10,7 @@ public class Application {
         new Thread(new Serveur(ServiceReservation.class, 1000)).start();
         new Thread(new Serveur(ServiceEmprunt.class, 1001)).start();
         new Thread(new Serveur(ServiceRetour.class, 1002)).start();
-        Class.forName("mediatheque.DataHandler").newInstance();
+
+        Class.forName("Data.DataHandler").newInstance();
     }
 }
