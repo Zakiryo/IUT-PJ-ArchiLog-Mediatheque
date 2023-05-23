@@ -1,10 +1,9 @@
-package Data;
+package data;
 
 import mediatheque.Abonne;
 import mediatheque.DVD;
 import mediatheque.Document;
 import tasks.AnnulationReservation;
-import Data.TimerData;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -34,14 +33,19 @@ public final class DataHandler {
         return connection;
     }
 
-    public static List<Document> getDocuments() {
-        return documents;
-    }
-
     public static Abonne getAbonneById(int numero) {
         for (Abonne a : abonnes) {
             if (a.getNumero() == numero) {
                 return a;
+            }
+        }
+        return null;
+    }
+
+    public static Document getDocumentById(int numero) {
+        for (Document d : documents) {
+            if (d.numero() == numero) {
+                return d;
             }
         }
         return null;
@@ -72,7 +76,7 @@ public final class DataHandler {
 
     public static StringBuilder getCatalogue() {
         StringBuilder catalogue = new StringBuilder();
-        try (PreparedStatement psTitres = connection.prepareStatement("SELECT NUMERO, TITRE, TYPE FROM DOCUMENT");
+        try (PreparedStatement psTitres = connection.prepareStatement("SELECT NUMERO, TITRE, TYPE FROM DOCUMENT ORDER BY 1");
              ResultSet resTitres = psTitres.executeQuery()) {
             while (resTitres.next()) {
                 catalogue.append(resTitres.getString("type").toUpperCase()).append(" : ")
@@ -87,10 +91,9 @@ public final class DataHandler {
     }
 
     public static void validReservation(int documentID) {
-        if(activeTimers.containsKey(documentID)) {
+        if (activeTimers.containsKey(documentID)) {
             activeTimers.get(documentID).getTimer().cancel();
             activeTimers.remove(documentID);
-            System.out.println("Le document réservé numéro " + documentID + " a été emprunté dans les temps.");
         }
     }
 

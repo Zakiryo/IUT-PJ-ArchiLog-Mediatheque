@@ -1,13 +1,14 @@
 package services;
 
-import bttp2.Codage;
+import bserveur.Service;
+import bttp.Codage;
 import exception.RestrictionException;
 import mediatheque.Abonne;
-import Data.DataHandler;
+import data.DataHandler;
 import mediatheque.Document;
-import serveur.Service;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.LocalDateTime;
 
@@ -18,70 +19,44 @@ public class ServiceReservation extends Service implements Runnable {
 
     @Override
     public void run() {
+        PrintWriter out = getOut();
+        Socket client = getClient();
         try {
-            Abonne abonne;
-            int numeroAbonne;
+            out.println(Codage.coder("Bienvenue au service de réservation ! Voici notre catalogue :\n" + DataHandler.getCatalogue() + "Veuillez saisir votre numéro d'abonné\n" + "> "));
 
-            getOut().println(Codage.coder("Bienvenue au service de réservation ! Voici notre catalogue :\n" + DataHandler.getCatalogue() + "Veuillez saisir votre numéro d'abonné\n" + "> "));
-
-            try {
-                numeroAbonne = Integer.parseInt(getIn().readLine());
-            } catch (NumberFormatException e) {
-                getOut().println(Codage.coder("Numéro d'abonné incorrect."));
-                getClient().close();
-                return;
-            }
-
-            abonne = DataHandler.getAbonneById(numeroAbonne);
-
+            Abonne abonne = checkAbonne();
             if (abonne == null) {
-                getOut().println(Codage.coder("Ce numéro d'abonné n'est pas enregistré."));
-                getClient().close();
+                client.close();
                 return;
             }
 
-            getOut().println(Codage.coder("Veuillez maintenant saisir le numéro du document que vous souhaitez réserver\n" + "> "));
-            int numeroDocument;
+            out.println(Codage.coder("Veuillez maintenant saisir le numéro du document que vous souhaitez réserver\n" + "> "));
 
-            try {
-                numeroDocument = Integer.parseInt(getIn().readLine());
-            } catch (NumberFormatException e) {
-                getOut().println(Codage.coder("Numéro de document incorrect."));
-                getClient().close();
+            Document doc = checkDocument();
+            if (doc == null) {
+                client.close();
                 return;
             }
 
-            for (Document doc : DataHandler.getDocuments()) {
-                if (doc.numero() == numeroDocument) {
-                    if (doc.reservePar() != null) {
-                        LocalDateTime availabilityTime = DataHandler.getReservationExpirationDate(doc.numero());
-                        String alreadyBorrowedResponse = "Ce document est réservé. Il sera disponible à "
-                                + availabilityTime.getHour()
-                                + "h"
-                                + availabilityTime.getMinute();
-                        getOut().println(Codage.coder(alreadyBorrowedResponse));
-                        getClient().close();
-                        return;
-                    } else if (doc.empruntePar() != null) {
-                        getOut().println(Codage.coder("Ce document est déjà emprunté."));
-                        getClient().close();
-                        return;
-                    } else {
-                        doc.reservation(abonne);
-                        DataHandler.reservationTimerTaskStart(doc.numero());
-                        getOut().println(Codage.coder("Le document a bien été réservé ! Vous avez deux heures pour le retirer à la borne emprunt de la médiathèque."));
-                        getClient().close();
-                        return;
-                    }
-                }
+            if (doc.reservePar() != null) {
+                LocalDateTime availabilityTime = DataHandler.getReservationExpirationDate(doc.numero());
+                out.println(Codage.coder("Ce document est réservé. Il sera disponible à " + availabilityTime.getHour() + "h" + availabilityTime.getMinute()));
+                client.close();
+                return;
+            } else if (doc.empruntePar() != null) {
+                out.println(Codage.coder("Ce document est déjà emprunté."));
+                client.close();
+                return;
             }
 
-            getOut().println(Codage.coder("Ce numéro de document n'existe pas."));
-            getClient().close();
+            doc.reservation(abonne);
+            DataHandler.reservationTimerTaskStart(doc.numero());
+            out.println(Codage.coder("Le document a bien été réservé ! Vous avez deux heures pour le retirer à la borne emprunt de la médiathèque."));
+            client.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (RestrictionException e) {
-            getOut().println(Codage.coder(e.getMessage()));
+            out.println(Codage.coder(e.getMessage()));
         }
     }
 }

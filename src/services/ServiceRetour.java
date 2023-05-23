@@ -1,11 +1,11 @@
 package services;
 
-import bttp2.Codage;
-import Data.DataHandler;
+import bserveur.Service;
+import bttp.Codage;
 import mediatheque.Document;
-import serveur.Service;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ServiceRetour extends Service implements Runnable {
@@ -15,34 +15,27 @@ public class ServiceRetour extends Service implements Runnable {
 
     @Override
     public void run() {
+        PrintWriter out = getOut();
+        Socket client = getClient();
         try {
-            getOut().println(Codage.coder("Bienvenue au service de retour !\nVeuillez saisir le numéro du document à retourner\n" + "> "));
-            int numeroDoc;
+            out.println(Codage.coder("Bienvenue au service de retour !\nVeuillez saisir le numéro du document à retourner\n" + "> "));
 
-            try {
-                numeroDoc = Integer.parseInt(getIn().readLine());
-            } catch (NumberFormatException e) {
-                getOut().println(Codage.coder("Numéro de document incorrect."));
-                getClient().close();
+            Document doc = checkDocument();
+            if (doc == null) {
+                client.close();
                 return;
             }
 
-            for (Document doc : DataHandler.getDocuments()) {
-                if (doc.numero() == numeroDoc) {
-                    if (doc.empruntePar() == null && doc.reservePar() == null) {
-                        getOut().println(Codage.coder("Ce document n'est ni réservé ni emprunté."));
-                    } else {
-                        doc.retour();
-                        getOut().println(Codage.coder("Le document a bien été retourné."));
-                    }
-
-                    getClient().close();
-                    return;
-                }
+            if (doc.empruntePar() == null && doc.reservePar() == null) {
+                out.println(Codage.coder("Ce document n'est ni réservé ni emprunté."));
+                client.close();
+                return;
+            } else {
+                doc.retour();
+                out.println(Codage.coder("Le document a bien été retourné."));
             }
 
-            getOut().println(Codage.coder("Ce numéro de document n'existe pas."));
-            getClient().close();
+            client.close();
         } catch (IOException e) {
             System.out.println("Un utilisateur a interrompu sa connexion avec le serveur. / Une erreur est survenue.");
         }

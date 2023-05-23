@@ -1,6 +1,6 @@
 package mediatheque;
 
-import Data.DataHandler;
+import data.DataHandler;
 import exception.RestrictionException;
 
 import java.sql.PreparedStatement;

@@ -1,4 +1,4 @@
-package Data;
+package data;
 
 import java.time.LocalDateTime;
 import java.util.Timer;

@@ -7,8 +7,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="bserveur" level="project" />
-    <orderEntry type="library" name="bttp2" level="project" />
     <orderEntry type="library" name="ojdbc11" level="project" />
   </component>
 </module>

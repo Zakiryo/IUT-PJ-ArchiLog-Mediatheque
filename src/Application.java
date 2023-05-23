@@ -1,4 +1,4 @@
-import serveur.Serveur;
+import bserveur.Serveur;
 import services.ServiceEmprunt;
 import services.ServiceReservation;
 import services.ServiceRetour;
@@ -11,6 +11,6 @@ public class Application {
         new Thread(new Serveur(ServiceEmprunt.class, 1001)).start();
         new Thread(new Serveur(ServiceRetour.class, 1002)).start();
 
-        Class.forName("Data.DataHandler").newInstance();
+        Class.forName("data.DataHandler").newInstance();
     }
 }
