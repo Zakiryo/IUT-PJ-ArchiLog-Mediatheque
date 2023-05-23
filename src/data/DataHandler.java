@@ -100,8 +100,7 @@ public final class DataHandler {
     public static void reservationTimerTaskStart(int documentID) {
         Timer timer = new Timer();
         LocalDateTime reservationExpiration = LocalDateTime.now().plusHours(2);
-        TimerTask task = new AnnulationReservation(documentID, reservationExpiration);
-
+        TimerTask task = new AnnulationReservation(documentID);
         Date scheduledExpirationDate = Date.from(reservationExpiration.atZone(ZoneId.systemDefault()).toInstant());
         timer.schedule(task, scheduledExpirationDate);
         activeTimers.put(documentID, new TimerData(timer, reservationExpiration));
