@@ -123,6 +123,7 @@ public class DVD implements Document {
                 psRetour = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET RESERVE_PAR = NULL, EMPRUNTE_PAR = NULL WHERE NUMERO = ?");
                 psRetour.setInt(1, numero);
                 psRetour.executeUpdate();
+                DataHandler.sendMailAlert(this);
             }
             psRetour.close();
         } catch (SQLException e) {

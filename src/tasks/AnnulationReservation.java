@@ -22,6 +22,7 @@ public class AnnulationReservation extends TimerTask {
                 psAnnulationReservation = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET EMPRUNTE_PAR = NULL, RESERVE_PAR = NULL WHERE NUMERO = ?");
                 psAnnulationReservation.setInt(1, documentID);
                 psAnnulationReservation.executeUpdate();
+                DataHandler.sendMailAlert(DataHandler.getDocumentById(documentID));
             }
             psAnnulationReservation.close();
         } catch (SQLException e) {
