@@ -33,13 +33,8 @@ public final class DataHandler {
     public DataHandler() throws SQLException {
         activeTimers = new HashMap<>();
         connection = DriverManager.getConnection(HOST, USER, PASSWORD);
-
         fetchAbonnes();
         fetchAllDocuments();
-    }
-
-    public static Connection getConnection() {
-        return connection;
     }
 
     public static Abonne getAbonneById(int numero) {
@@ -67,11 +62,32 @@ public final class DataHandler {
             int numero = resDocs.getInt("numero");
             String type = resDocs.getString("type");
             boolean adulte = resDocs.getInt("adulte") == 1;
+            Abonne emprunteur = getAbonneById(resDocs.getInt("emprunte_par"));
+            Abonne reserveur = getAbonneById(resDocs.getInt("reserve_par"));
             switch (type.toLowerCase()) {
-                case "dvd" -> documents.add(new DVD(numero, adulte));
+                case "dvd" -> documents.add(new DVD(numero, adulte, emprunteur, reserveur));
                 default -> throw new RuntimeException("Type de document non pris en charge par l'application.");
             }
         }
+    }
+
+    public static void updateDatabase(Document document) throws SQLException {
+        PreparedStatement psUpdate = connection.prepareStatement("UPDATE DOCUMENT SET EMPRUNTE_PAR = ?, RESERVE_PAR = ? WHERE NUMERO = ?");
+        Integer numeroEmprunteur = (document.empruntePar() != null) ? document.empruntePar().getNumero() : null;
+        Integer numeroReserveur = (document.reservePar() != null) ? document.reservePar().getNumero() : null;
+        if ((numeroEmprunteur == null)) {
+            psUpdate.setNull(1, Types.INTEGER);
+        } else {
+            psUpdate.setInt(1, numeroEmprunteur);
+        }
+        if ((numeroReserveur == null)) {
+            psUpdate.setNull(2, Types.INTEGER);
+        } else {
+            psUpdate.setInt(2, numeroReserveur);
+        }
+        psUpdate.setInt(3, document.numero());
+        psUpdate.executeUpdate();
+        psUpdate.close();
     }
 
     private static void fetchAbonnes() throws SQLException {

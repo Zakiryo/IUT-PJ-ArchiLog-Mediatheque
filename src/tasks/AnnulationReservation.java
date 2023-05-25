@@ -4,6 +4,7 @@ import data.DataHandler;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.TimerTask;
 
 public class AnnulationReservation extends TimerTask {
@@ -16,19 +17,9 @@ public class AnnulationReservation extends TimerTask {
 
     @Override
     public void run() {
-        PreparedStatement psAnnulationReservation;
-        try {
-            synchronized (DataHandler.getConnection()) {
-                psAnnulationReservation = DataHandler.getConnection().prepareStatement("UPDATE DOCUMENT SET EMPRUNTE_PAR = NULL, RESERVE_PAR = NULL WHERE NUMERO = ?");
-                psAnnulationReservation.setInt(1, documentID);
-                psAnnulationReservation.executeUpdate();
-                DataHandler.sendMailAlert(DataHandler.getDocumentById(documentID));
-            }
-            psAnnulationReservation.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Objects.requireNonNull(DataHandler.getDocumentById(documentID)).retour();
         DataHandler.removeTimer(documentID);
         cancel();
+        System.out.println("reservation annulee");
     }
 }
