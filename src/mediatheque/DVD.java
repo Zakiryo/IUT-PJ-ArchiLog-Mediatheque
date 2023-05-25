@@ -39,11 +39,13 @@ public class DVD implements Document {
         if (adulte && ab.getAge() < 18) {
             throw new RestrictionException("Vous n'avez pas l'âge requis pour réserver ce document.");
         }
-        reserveur = ab;
-        try {
-            DataHandler.updateDatabase(this);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        synchronized (this) {
+            reserveur = ab;
+            try {
+                DataHandler.updateDatabase(this);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -53,24 +55,28 @@ public class DVD implements Document {
         if (adulte && ab.getAge() < 18) {
             throw new RestrictionException("Vous n'avez pas l'âge requis pour emprunter ce document.");
         }
-        emprunteur = ab;
-        reserveur = null;
-        try {
-            DataHandler.updateDatabase(this);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        synchronized (this) {
+            emprunteur = ab;
+            reserveur = null;
+            try {
+                DataHandler.updateDatabase(this);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     @Override
     public void retour() {
-        reserveur = null;
-        emprunteur = null;
-        DataHandler.sendMailAlert(this);
-        try {
-            DataHandler.updateDatabase(this);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        synchronized (this) {
+            reserveur = null;
+            emprunteur = null;
+            DataHandler.sendMailAlert(this);
+            try {
+                DataHandler.updateDatabase(this);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

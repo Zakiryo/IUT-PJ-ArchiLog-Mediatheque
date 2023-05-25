@@ -55,6 +55,15 @@ public final class DataHandler {
         return null;
     }
 
+    private static void fetchAbonnes() throws SQLException {
+        try (PreparedStatement psAbonnes = connection.prepareStatement("SELECT NUMERO, DATE_DE_NAISSANCE FROM ABONNE");
+             ResultSet resAbonnes = psAbonnes.executeQuery()) {
+            while (resAbonnes.next()) {
+                abonnes.add(new Abonne(resAbonnes.getInt("numero"), resAbonnes.getDate("date_de_naissance").toLocalDate()));
+            }
+        }
+    }
+
     private static void fetchAllDocuments() throws SQLException {
         PreparedStatement psDocs = connection.prepareStatement("SELECT doc.*, dvd.adulte FROM DOCUMENT doc LEFT JOIN DVD dvd ON doc.numero = dvd.numero");
         ResultSet resDocs = psDocs.executeQuery();
@@ -79,15 +88,7 @@ public final class DataHandler {
         psUpdate.setObject(2, numeroReserveur, Types.INTEGER);
         psUpdate.setInt(3, document.numero());
         psUpdate.executeUpdate();
-    }
-
-    private static void fetchAbonnes() throws SQLException {
-        try (PreparedStatement psAbonnes = connection.prepareStatement("SELECT NUMERO, DATE_DE_NAISSANCE FROM ABONNE");
-             ResultSet resAbonnes = psAbonnes.executeQuery()) {
-            while (resAbonnes.next()) {
-                abonnes.add(new Abonne(resAbonnes.getInt("numero"), resAbonnes.getDate("date_de_naissance").toLocalDate()));
-            }
-        }
+        psUpdate.close();
     }
 
     public static StringBuilder getCatalogue() {
