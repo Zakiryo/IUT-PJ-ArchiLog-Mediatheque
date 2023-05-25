@@ -40,7 +40,7 @@ public class ServiceEmprunt extends Service implements Runnable {
 
             if (doc.reservePar() != null && doc.reservePar() != abonne) {
                 LocalDateTime availabilityTime = DataHandler.getReservationExpirationDate(doc.numero());
-                out.println(Codage.coder("Ce document est réservé. Il sera disponible à " + availabilityTime.getHour() + "h" + availabilityTime.getMinute()));
+                out.println(Codage.coder("Ce document est réservé jusqu'à " + availabilityTime.getHour() + "h" + availabilityTime.getMinute() + "."));
                 client.close();
                 return;
             } else if (doc.empruntePar() != null) {

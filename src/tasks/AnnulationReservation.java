@@ -2,8 +2,6 @@ package tasks;
 
 import data.DataHandler;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Objects;
 import java.util.TimerTask;
 

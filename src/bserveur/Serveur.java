@@ -17,12 +17,11 @@ public class Serveur implements Runnable {
     public void run() {
         while (!this.listen_socket.isClosed()) {
             try {
-                (new Thread((Runnable) this.service.getConstructor(Socket.class).newInstance(this.listen_socket.accept()))).start();
+                (new Thread(this.service.getConstructor(Socket.class).newInstance(this.listen_socket.accept()))).start();
             } catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException |
-                     IOException | InstantiationException | IllegalAccessException var2) {
-                var2.printStackTrace();
+                     IOException | InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
-
     }
 }

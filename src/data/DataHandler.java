@@ -28,7 +28,7 @@ public final class DataHandler {
     private static final List<Document> documents = new ArrayList<>();
     private static final List<Abonne> abonnes = new ArrayList<>();
     private static HashMap<Integer, TimerData> activeTimers;
-    private static List<Document> mailAlerts = new ArrayList<>();
+    private static final List<Document> mailAlerts = new ArrayList<>();
 
     public DataHandler() throws SQLException {
         activeTimers = new HashMap<>();
@@ -75,19 +75,10 @@ public final class DataHandler {
         PreparedStatement psUpdate = connection.prepareStatement("UPDATE DOCUMENT SET EMPRUNTE_PAR = ?, RESERVE_PAR = ? WHERE NUMERO = ?");
         Integer numeroEmprunteur = (document.empruntePar() != null) ? document.empruntePar().getNumero() : null;
         Integer numeroReserveur = (document.reservePar() != null) ? document.reservePar().getNumero() : null;
-        if ((numeroEmprunteur == null)) {
-            psUpdate.setNull(1, Types.INTEGER);
-        } else {
-            psUpdate.setInt(1, numeroEmprunteur);
-        }
-        if ((numeroReserveur == null)) {
-            psUpdate.setNull(2, Types.INTEGER);
-        } else {
-            psUpdate.setInt(2, numeroReserveur);
-        }
+        psUpdate.setObject(1, numeroEmprunteur, Types.INTEGER);
+        psUpdate.setObject(2, numeroReserveur, Types.INTEGER);
         psUpdate.setInt(3, document.numero());
         psUpdate.executeUpdate();
-        psUpdate.close();
     }
 
     private static void fetchAbonnes() throws SQLException {
@@ -161,10 +152,8 @@ public final class DataHandler {
                 Message message = new MimeMessage(session);
                 message.setFrom(new InternetAddress("athomosop@gmail.com"));
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("yohan.rudny@etu.u-paris.fr"));
-                message.setSubject("[Médiathèque] Document n°" + doc.numero() + " disponible");
-                message.setText("Bonjour grand Wakan Tanka.<br>" +
-                        "Nous vous informons par ce signal de fumée que le document n°" + doc.numero() + " peut de nouveau être envouté par les papooses !<br>" +
-                        "S'il est envouté, veillez bien à ce que celui-ci soit rendu dans les temps et sans dégradation au grand chef Geronimo.");
+                message.setSubject("[Médiathèque] Document disponible");
+                message.setText("oe c'est bon");
                 Transport.send(message);
             } catch (MessagingException e) {
                 e.printStackTrace();

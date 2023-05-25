@@ -17,8 +17,6 @@ public class Abonne {
     }
 
     public int getAge() {
-        LocalDate currentDate = LocalDate.now();
-        Period age = Period.between(dateNaissance, currentDate);
-        return age.getYears();
+        return Period.between(dateNaissance, LocalDate.now()).getYears();
     }
 }
