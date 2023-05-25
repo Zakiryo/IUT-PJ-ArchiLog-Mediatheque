@@ -18,6 +18,5 @@ public class AnnulationReservation extends TimerTask {
         Objects.requireNonNull(DataHandler.getDocumentById(documentID)).retour();
         DataHandler.removeTimer(documentID);
         cancel();
-        System.out.println("reservation annulee");
     }
 }

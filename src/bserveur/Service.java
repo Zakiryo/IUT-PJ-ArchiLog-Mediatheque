@@ -22,6 +22,10 @@ public abstract class Service implements Runnable {
         this.out = new PrintWriter(this.client.getOutputStream(), true);
     }
 
+    public BufferedReader getIn() {
+        return this.in;
+    }
+
     public PrintWriter getOut() {
         return this.out;
     }
@@ -60,17 +64,5 @@ public abstract class Service implements Runnable {
             return null;
         }
         return document;
-    }
-
-    public void proceedAlertResponse(Document document) throws IOException {
-        switch (in.readLine()) {
-            case "O":
-                DataHandler.addToAlertList(document);
-                out.println(Codage.coder("Merci. Un mail sera envoyé lorsque le document n°" + document.numero() + " sera disponible."));
-            case "N":
-                out.println(Codage.coder("Merci de votre visite."));
-            default:
-                out.println(Codage.coder("Réponse non reconnue. Merci de répondre par O (Oui) ou N (Non)."));
-        }
     }
 }

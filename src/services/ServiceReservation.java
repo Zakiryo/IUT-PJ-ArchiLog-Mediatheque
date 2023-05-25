@@ -7,20 +7,23 @@ import mediatheque.Abonne;
 import data.DataHandler;
 import mediatheque.Document;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.LocalDateTime;
 
 public class ServiceReservation extends Service implements Runnable {
+    private final BufferedReader in = getIn();
+    private final PrintWriter out = getOut();
+    private final Socket client = getClient();
+
     public ServiceReservation(Socket socket) throws IOException {
         super(socket);
     }
 
     @Override
     public void run() {
-        PrintWriter out = getOut();
-        Socket client = getClient();
         try {
             out.println(Codage.coder("Bienvenue au service de réservation ! Voici notre catalogue :\n" + DataHandler.getCatalogue() + "Veuillez saisir votre numéro d'abonné\n" + "> "));
 
@@ -61,6 +64,18 @@ public class ServiceReservation extends Service implements Runnable {
             throw new RuntimeException(e);
         } catch (RestrictionException e) {
             out.println(Codage.coder(e.getMessage()));
+        }
+    }
+
+    private void proceedAlertResponse(Document document) throws IOException {
+        switch (in.readLine()) {
+            case "O":
+                DataHandler.addToAlertList(document);
+                out.println(Codage.coder("Merci. Un mail sera envoyé lorsque le document n°" + document.numero() + " sera disponible."));
+            case "N":
+                out.println(Codage.coder("Merci de votre visite."));
+            default:
+                out.println(Codage.coder("Réponse non reconnue. Merci de répondre par O (Oui) ou N (Non)."));
         }
     }
 }
