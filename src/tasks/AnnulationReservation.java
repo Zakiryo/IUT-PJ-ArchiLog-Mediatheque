@@ -1,22 +1,23 @@
 package tasks;
 
 import data.DataHandler;
+import mediatheque.Document;
 
 import java.util.Objects;
 import java.util.TimerTask;
 
 public class AnnulationReservation extends TimerTask {
 
-    private final int documentID;
+    private final Document document;
 
-    public AnnulationReservation(int documentID) {
-        this.documentID = documentID;
+    public AnnulationReservation(Document document) {
+        this.document = document;
     }
 
     @Override
     public void run() {
-        Objects.requireNonNull(DataHandler.getDocumentById(documentID)).retour();
-        DataHandler.removeTimer(documentID);
+        document.retour();
+        DataHandler.removeTimer(document);
         cancel();
     }
 }

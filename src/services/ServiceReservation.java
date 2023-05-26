@@ -42,7 +42,7 @@ public class ServiceReservation extends Service implements Runnable {
             }
 
             if (doc.reservePar() != null) {
-                LocalDateTime availabilityTime = DataHandler.getReservationExpirationDate(doc.numero());
+                LocalDateTime availabilityTime = DataHandler.getReservationExpirationDate(doc);
                 out.println(Codage.coder("Ce document est réservé jusqu'à " + availabilityTime.getHour() + "h" + availabilityTime.getMinute() + ". " +
                         "Souhaitez-vous placer une alerte par mail lorsque celui-ci sera de nouveau disponible ? (O/N)\n" + "> "));
                 proceedAlertResponse(doc);
@@ -57,7 +57,7 @@ public class ServiceReservation extends Service implements Runnable {
             }
 
             doc.reservation(abonne);
-            DataHandler.reservationTimerTaskStart(doc.numero());
+            DataHandler.reservationTimerTaskStart(doc);
             out.println(Codage.coder("Le document a bien été réservé ! Vous avez deux heures pour le retirer à la borne emprunt de la médiathèque."));
             client.close();
         } catch (IOException e) {

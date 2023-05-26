@@ -27,7 +27,7 @@ public final class DataHandler {
     private static Connection connection = null;
     private static final List<Document> documents = new ArrayList<>();
     private static final List<Abonne> abonnes = new ArrayList<>();
-    private static HashMap<Integer, TimerData> activeTimers;
+    private static HashMap<Document, TimerData> activeTimers;
     private static final List<Document> mailAlerts = new ArrayList<>();
 
     public DataHandler() throws SQLException {
@@ -107,28 +107,28 @@ public final class DataHandler {
         return catalogue;
     }
 
-    public static void validReservation(int documentID) {
-        if (activeTimers.containsKey(documentID)) {
-            activeTimers.get(documentID).getTimer().cancel();
-            activeTimers.remove(documentID);
+    public static void validReservation(Document document) {
+        if (activeTimers.containsKey(document)) {
+            activeTimers.get(document).getTimer().cancel();
+            activeTimers.remove(document);
         }
     }
 
-    public static void reservationTimerTaskStart(int documentID) {
+    public static void reservationTimerTaskStart(Document document) {
         Timer timer = new Timer();
         LocalDateTime reservationExpiration = LocalDateTime.now().plusHours(2);
-        TimerTask task = new AnnulationReservation(documentID);
+        TimerTask task = new AnnulationReservation(document);
         Date scheduledExpirationDate = Date.from(reservationExpiration.atZone(ZoneId.systemDefault()).toInstant());
         timer.schedule(task, scheduledExpirationDate);
-        activeTimers.put(documentID, new TimerData(timer, reservationExpiration));
+        activeTimers.put(document, new TimerData(timer, reservationExpiration));
     }
 
-    public static void removeTimer(int documentID) {
-        activeTimers.remove(documentID);
+    public static void removeTimer(Document document) {
+        activeTimers.remove(document);
     }
 
-    public static LocalDateTime getReservationExpirationDate(int documentID) {
-        return activeTimers.get(documentID).getDate();
+    public static LocalDateTime getReservationExpirationDate(Document document) {
+        return activeTimers.get(document).getDate();
     }
 
     public static void addToAlertList(Document doc) {
@@ -153,8 +153,10 @@ public final class DataHandler {
                 Message message = new MimeMessage(session);
                 message.setFrom(new InternetAddress("athomosop@gmail.com"));
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("yohan.rudny@etu.u-paris.fr"));
-                message.setSubject("[Médiathèque] Document disponible");
-                message.setText("oe c'est bon");
+                message.setSubject("[Médiathèque] Document n°" + doc.numero() + " disponible");
+                message.setText("Bonjour grand Wakan Tanka.<br>" +
+                        "Nous vous informons par ce signal de fumée que le document n°" + doc.numero() + " peut de nouveau être envouté par les papooses !<br>" +
+                        "S'il est envouté, veillez bien à ce que celui-ci soit rendu dans les temps et sans dégradation au grand chef Geronimo.");
                 Transport.send(message);
             } catch (MessagingException e) {
                 e.printStackTrace();
