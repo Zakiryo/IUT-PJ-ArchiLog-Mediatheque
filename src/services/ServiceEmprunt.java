@@ -2,6 +2,7 @@ package services;
 
 import bserveur.Service;
 import bttp.Codage;
+import data.TimerHandler;
 import exception.RestrictionException;
 import mediatheque.Abonne;
 import data.DataHandler;
@@ -39,7 +40,7 @@ public class ServiceEmprunt extends Service implements Runnable {
             }
 
             if (doc.reservePar() != null && doc.reservePar() != abonne) {
-                LocalDateTime availabilityTime = DataHandler.getReservationExpirationDate(doc);
+                LocalDateTime availabilityTime = TimerHandler.getReservationExpirationDate(doc);
                 out.println(Codage.coder("Ce document est réservé jusqu'à " + availabilityTime.getHour() + "h" + availabilityTime.getMinute() + "."));
                 client.close();
                 return;
@@ -50,7 +51,6 @@ public class ServiceEmprunt extends Service implements Runnable {
             }
 
             doc.emprunt(abonne);
-            DataHandler.validReservation(doc);
             out.println(Codage.coder("Le document a bien été emprunté !"));
             client.close();
         } catch (IOException e) {

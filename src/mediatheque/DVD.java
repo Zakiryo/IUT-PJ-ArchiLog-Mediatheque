@@ -1,6 +1,8 @@
 package mediatheque;
 
 import data.DataHandler;
+import data.MailAlert;
+import data.TimerHandler;
 import exception.RestrictionException;
 
 import java.sql.SQLException;
@@ -63,6 +65,7 @@ public class DVD implements Document {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
+            TimerHandler.validReservation(this);
         }
     }
 
@@ -71,7 +74,7 @@ public class DVD implements Document {
         synchronized (this) {
             reserveur = null;
             emprunteur = null;
-            DataHandler.sendMailAlert(this);
+            MailAlert.sendMailAlert(this);
             try {
                 DataHandler.updateDatabase(this);
             } catch (SQLException e) {

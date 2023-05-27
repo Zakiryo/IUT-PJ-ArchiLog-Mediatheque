@@ -1,24 +1,9 @@
 package data;
 
-import mediatheque.Abonne;
-import mediatheque.DVD;
-import mediatheque.Document;
-import tasks.AnnulationReservation;
-
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Authenticator;
+import mediatheque.*;
 
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
-import java.util.Date;
 
 public final class DataHandler {
     private static final String HOST = "jdbc:oracle:thin:@localhost:1521:XE";
@@ -27,11 +12,8 @@ public final class DataHandler {
     private static Connection connection = null;
     private static final List<Document> documents = new ArrayList<>();
     private static final List<Abonne> abonnes = new ArrayList<>();
-    private static HashMap<Document, TimerData> activeTimers;
-    private static final List<Document> mailAlerts = new ArrayList<>();
 
     public DataHandler() throws SQLException {
-        activeTimers = new HashMap<>();
         connection = DriverManager.getConnection(HOST, USER, PASSWORD);
         fetchAbonnes();
         fetchAllDocuments();
@@ -56,12 +38,13 @@ public final class DataHandler {
     }
 
     private static void fetchAbonnes() throws SQLException {
-        try (PreparedStatement psAbonnes = connection.prepareStatement("SELECT NUMERO, DATE_DE_NAISSANCE FROM ABONNE");
-             ResultSet resAbonnes = psAbonnes.executeQuery()) {
-            while (resAbonnes.next()) {
-                abonnes.add(new Abonne(resAbonnes.getInt("numero"), resAbonnes.getDate("date_de_naissance").toLocalDate()));
-            }
+        PreparedStatement psAbonnes = connection.prepareStatement("SELECT NUMERO, DATE_DE_NAISSANCE FROM ABONNE");
+        ResultSet resAbonnes = psAbonnes.executeQuery();
+        while (resAbonnes.next()) {
+            abonnes.add(new Abonne(resAbonnes.getInt("numero"), resAbonnes.getDate("date_de_naissance").toLocalDate()));
         }
+        psAbonnes.close();
+        resAbonnes.close();
     }
 
     private static void fetchAllDocuments() throws SQLException {
@@ -78,6 +61,8 @@ public final class DataHandler {
                 default -> throw new RuntimeException("Type de document non pris en charge par l'application.");
             }
         }
+        psDocs.close();
+        resDocs.close();
     }
 
     public static void updateDatabase(Document document) throws SQLException {
@@ -105,64 +90,5 @@ public final class DataHandler {
             System.out.println("Erreur lors de la récupération du catalogue : " + e.getMessage());
         }
         return catalogue;
-    }
-
-    public static void validReservation(Document document) {
-        if (activeTimers.containsKey(document)) {
-            activeTimers.get(document).getTimer().cancel();
-            activeTimers.remove(document);
-        }
-    }
-
-    public static void reservationTimerTaskStart(Document document) {
-        Timer timer = new Timer();
-        LocalDateTime reservationExpiration = LocalDateTime.now().plusHours(2);
-        TimerTask task = new AnnulationReservation(document);
-        Date scheduledExpirationDate = Date.from(reservationExpiration.atZone(ZoneId.systemDefault()).toInstant());
-        timer.schedule(task, scheduledExpirationDate);
-        activeTimers.put(document, new TimerData(timer, reservationExpiration));
-    }
-
-    public static void removeTimer(Document document) {
-        activeTimers.remove(document);
-    }
-
-    public static LocalDateTime getReservationExpirationDate(Document document) {
-        return activeTimers.get(document).getDate();
-    }
-
-    public static void addToAlertList(Document doc) {
-        mailAlerts.add(doc);
-    }
-
-    public static void sendMailAlert(Document doc) {
-        if (mailAlerts.contains(doc)) {
-            Properties prop = new Properties();
-            prop.put("mail.smtp.host", "smtp.gmail.com");
-            prop.put("mail.smtp.port", "587");
-            prop.put("mail.smtp.auth", "true");
-            prop.put("mail.smtp.starttls.enable", "true");
-
-            Session session = Session.getInstance(prop, new Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication("athomosop@gmail.com", "jccshxiopsaziezo");
-                }
-            });
-
-            try {
-                Message message = new MimeMessage(session);
-                message.setFrom(new InternetAddress("athomosop@gmail.com"));
-                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("yohan.rudny@etu.u-paris.fr"));
-                message.setSubject("[Médiathèque] Document n°" + doc.numero() + " disponible");
-                message.setText("Bonjour grand Wakan Tanka.<br>" +
-                        "Nous vous informons par ce signal de fumée que le document n°" + doc.numero() + " peut de nouveau être envouté par les papooses !<br>" +
-                        "S'il est envouté, veillez bien à ce que celui-ci soit rendu dans les temps et sans dégradation au grand chef Geronimo.");
-                Transport.send(message);
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-
-            mailAlerts.remove(doc);
-        }
     }
 }
