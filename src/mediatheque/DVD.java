@@ -1,38 +1,28 @@
 package mediatheque;
 
-import data.DataHandler;
-import data.MailAlert;
-import data.TimerHandler;
 import exception.RestrictionException;
 
-import java.sql.SQLException;
-
-public class DVD implements Document {
-    private final int numero;
+public class DVD extends DocumentFactory implements Document {
     private final boolean adulte;
-    private Abonne emprunteur;
-    private Abonne reserveur;
 
     public DVD(int numero, boolean adulte, Abonne emprunteur, Abonne reserveur) {
-        this.numero = numero;
+        super(numero, emprunteur, reserveur);
         this.adulte = adulte;
-        this.emprunteur = emprunteur;
-        this.reserveur = reserveur;
     }
 
     @Override
     public int numero() {
-        return numero;
+        return super.numero();
     }
 
     @Override
     public Abonne empruntePar() {
-        return emprunteur;
+        return super.empruntePar();
     }
 
     @Override
     public Abonne reservePar() {
-        return reserveur;
+        return super.reservePar();
     }
 
     @Override
@@ -41,14 +31,7 @@ public class DVD implements Document {
         if (adulte && ab.getAge() < 18) {
             throw new RestrictionException("Vous n'avez pas l'âge requis pour réserver ce document.");
         }
-        synchronized (this) {
-            reserveur = ab;
-            try {
-                DataHandler.updateDatabase(this);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        super.reservation(ab);
     }
 
     @Override
@@ -57,29 +40,11 @@ public class DVD implements Document {
         if (adulte && ab.getAge() < 18) {
             throw new RestrictionException("Vous n'avez pas l'âge requis pour emprunter ce document.");
         }
-        synchronized (this) {
-            emprunteur = ab;
-            reserveur = null;
-            try {
-                DataHandler.updateDatabase(this);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-            TimerHandler.validReservation(this);
-        }
+        super.emprunt(ab);
     }
 
     @Override
     public void retour() {
-        synchronized (this) {
-            reserveur = null;
-            emprunteur = null;
-            MailAlert.sendMailAlert(this);
-            try {
-                DataHandler.updateDatabase(this);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        super.retour();
     }
 }
