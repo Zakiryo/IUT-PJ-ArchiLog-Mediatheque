@@ -2,27 +2,12 @@ package mediatheque;
 
 import exception.RestrictionException;
 
-public class DVD extends DocumentFactory implements Document {
+public class DVD extends DocumentFactory {
     private final boolean adulte;
 
     public DVD(int numero, boolean adulte, Abonne emprunteur, Abonne reserveur) {
         super(numero, emprunteur, reserveur);
         this.adulte = adulte;
-    }
-
-    @Override
-    public int numero() {
-        return super.numero();
-    }
-
-    @Override
-    public Abonne empruntePar() {
-        return super.empruntePar();
-    }
-
-    @Override
-    public Abonne reservePar() {
-        return super.reservePar();
     }
 
     @Override
@@ -41,10 +26,5 @@ public class DVD extends DocumentFactory implements Document {
             throw new RestrictionException("Vous n'avez pas l'âge requis pour emprunter ce document.");
         }
         super.emprunt(ab);
-    }
-
-    @Override
-    public void retour() {
-        super.retour();
     }
 }
