@@ -15,7 +15,7 @@ public class CancelReservation extends TimerTask {
     @Override
     public void run() {
         document.retour();
-        TimerHandler.removeTimer(document);
+        TimerHandler.removeFromReservations(document);
         cancel();
     }
 }

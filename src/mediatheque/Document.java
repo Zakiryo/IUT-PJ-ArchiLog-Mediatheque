@@ -2,6 +2,8 @@ package mediatheque;
 
 import exception.RestrictionException;
 
+import java.time.LocalDateTime;
+
 public interface Document {
     // return numéro du document
     int numero();
@@ -19,4 +21,7 @@ public interface Document {
 
     // retour d’un document ou annulation d‘une réservation
     void retour();
+
+    // BRETTESOFT "GERONIMO" : return date limite de retour du document fixée lors de l'emprunt
+    LocalDateTime dateRetour();
 }

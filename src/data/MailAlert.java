@@ -35,9 +35,9 @@ public class MailAlert {
                 message.setFrom(new InternetAddress("athomosop@gmail.com"));
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("yohan.rudny@etu.u-paris.fr"));
                 message.setSubject("[Médiathèque] Document n°" + doc.numero() + " disponible");
-                message.setText("Bonjour grand Wakan Tanka.<br>" +
-                        "Nous vous informons par ce signal de fumée que le document n°" + doc.numero() + " peut de nouveau être envouté par les papooses !<br>" +
-                        "S'il est envouté, veillez bien à ce que celui-ci soit rendu dans les temps et sans dégradation au grand chef Geronimo.");
+                message.setText("Bonjour grand Wakan Tanka. " +
+                        "Nous vous informons par ce signal de fumée que le document n°" + doc.numero() + " peut de nouveau être envouté ! " +
+                        "Prudence s'il est envouté, veillez bien à ce que celui-ci soit rendu dans les temps et sans dégradation au grand chef Geronimo.");
                 Transport.send(message);
             } catch (MessagingException e) {
                 e.printStackTrace();

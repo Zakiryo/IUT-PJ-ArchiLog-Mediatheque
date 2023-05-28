@@ -2,6 +2,7 @@ package bserveur;
 
 import bttp.Codage;
 import data.DataHandler;
+import data.TimerHandler;
 import mediatheque.Abonne;
 import mediatheque.Document;
 
@@ -10,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public abstract class Service implements Runnable {
     private final Socket client;
@@ -45,6 +48,13 @@ public abstract class Service implements Runnable {
         Abonne abonne = DataHandler.getAbonneById(numeroAbonne);
         if (abonne == null) {
             out.println(Codage.coder("Ce numéro d'abonné n'est pas enregistré."));
+            return null;
+        }
+        if (abonne.isBanned()) {
+            LocalDateTime banExpiration = TimerHandler.getUnbanDateTime(abonne);
+            out.println(Codage.coder("Cet abonné est banni de la médiathèque jusqu'au "
+                    + banExpiration.getDayOfMonth() + "/" + banExpiration.getMonthValue() + "/" + banExpiration.getYear() +
+                    " à " + banExpiration.getHour() + "h" + banExpiration.getMinute() + "."));
             return null;
         }
         return abonne;

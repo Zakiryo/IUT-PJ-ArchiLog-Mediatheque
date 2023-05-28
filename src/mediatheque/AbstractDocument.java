@@ -6,13 +6,16 @@ import data.TimerHandler;
 import exception.RestrictionException;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-public abstract class DocumentFactory implements Document {
+public abstract class AbstractDocument implements Document {
     private final int numero;
     private Abonne emprunteur;
     private Abonne reserveur;
+    private LocalDateTime dateRetour;
 
-    public DocumentFactory(int numero, Abonne emprunteur, Abonne reserveur) {
+    public AbstractDocument(int numero, Abonne emprunteur, Abonne reserveur) {
         this.numero = numero;
         this.emprunteur = emprunteur;
         this.reserveur = reserveur;
@@ -38,11 +41,11 @@ public abstract class DocumentFactory implements Document {
         assert (reservePar() == null && empruntePar() == null);
         synchronized (this) {
             reserveur = ab;
-            try {
-                DataHandler.updateDatabase(this);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+        }
+        try {
+            DataHandler.updateDatabase(this);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -52,13 +55,15 @@ public abstract class DocumentFactory implements Document {
         synchronized (this) {
             emprunteur = ab;
             reserveur = null;
-            try {
-                DataHandler.updateDatabase(this);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-            TimerHandler.validReservation(this);
+            dateRetour = LocalDateTime.now().plusMonths(1); // date limite de retour fixée à 1 mois après l'emprunt
         }
+        try {
+            DataHandler.updateDatabase(this);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        TimerHandler.validReservation(this);
+        TimerHandler.borrowTimerTaskStart(this);
     }
 
     @Override
@@ -66,12 +71,18 @@ public abstract class DocumentFactory implements Document {
         synchronized (this) {
             reserveur = null;
             emprunteur = null;
-            MailAlert.sendMailAlert(this);
-            try {
-                DataHandler.updateDatabase(this);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
         }
+        try {
+            DataHandler.updateDatabase(this);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        MailAlert.sendMailAlert(this);
+        TimerHandler.resetBorrow(this);
+    }
+
+    @Override
+    public LocalDateTime dateRetour() {
+        return dateRetour;
     }
 }

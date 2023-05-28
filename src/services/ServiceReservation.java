@@ -45,8 +45,8 @@ public class ServiceReservation extends Service implements Runnable {
 
             if (doc.reservePar() != null) {
                 LocalDateTime availabilityTime = TimerHandler.getReservationExpirationDate(doc);
-                out.println(Codage.coder("Ce document est réservé jusqu'à " + availabilityTime.getHour() + "h" + availabilityTime.getMinute() + ". " +
-                        "Souhaitez-vous placer une alerte par mail lorsque celui-ci sera de nouveau disponible ? (O/N)\n" + "> "));
+                out.println(Codage.coder("Ce document est réservé jusqu'à " + availabilityTime.getHour() + "h" + availabilityTime.getMinute() + "." +
+                        " Souhaitez-vous placer une alerte par mail lorsque celui-ci sera de nouveau disponible ? (O/N)\n" + "> "));
                 proceedAlertResponse(doc);
                 client.close();
                 return;

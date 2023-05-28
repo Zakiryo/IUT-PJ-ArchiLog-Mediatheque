@@ -21,7 +21,11 @@ public class Abonne {
         return Period.between(dateNaissance, LocalDate.now()).getYears();
     }
 
-    public void setBanned(boolean banned) {
+    public synchronized void setBanned(boolean banned) {
         this.banned = banned;
+    }
+
+    public boolean isBanned() {
+        return banned;
     }
 }
