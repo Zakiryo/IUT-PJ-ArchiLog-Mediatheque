@@ -37,8 +37,11 @@ public class ServiceRetour extends Service implements Runnable {
                 return;
             }
 
-            out.println(Codage.coder("Des dégradations ont-elles été constatées sur le document ? (O/N)\n" + "> "));
-            proceedDegradationResponse(doc);
+            if (doc.empruntePar() != null) {
+                out.println(Codage.coder("Des dégradations ont-elles été constatées sur le document ? (O/N)\n" + "> "));
+                proceedDegradationResponse(doc);
+            }
+
             client.close();
         } catch (IOException e) {
             System.out.println("Un utilisateur a interrompu sa connexion avec le serveur. / Une erreur est survenue.");
@@ -47,17 +50,18 @@ public class ServiceRetour extends Service implements Runnable {
 
     private void proceedDegradationResponse(Document document) throws IOException {
         switch (in.readLine()) {
-            case "O":
+            case "O" -> {
                 Abonne emprunteur = document.empruntePar();
                 emprunteur.setBanned(true);
                 TimerHandler.addToBanList(emprunteur);
                 document.retour();
                 out.println(Codage.coder("Suite à cette dégradation, le client n°" + emprunteur.getNumero() + " a été banni du service pendant un mois."));
-            case "N":
+            }
+            case "N" -> {
                 document.retour();
                 out.println(Codage.coder("Le document a bien été retourné."));
-            default:
-                out.println(Codage.coder("Réponse non reconnue. Merci de répondre par O (Oui) ou N (Non)."));
+            }
+            default -> out.println(Codage.coder("Réponse non reconnue. Merci de répondre par O (Oui) ou N (Non)."));
         }
     }
 }

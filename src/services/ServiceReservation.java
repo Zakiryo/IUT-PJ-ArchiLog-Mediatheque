@@ -62,22 +62,27 @@ public class ServiceReservation extends Service implements Runnable {
             TimerHandler.reservationTimerTaskStart(doc);
             out.println(Codage.coder("Le document a bien été réservé ! Vous avez deux heures pour le retirer à la borne emprunt de la médiathèque."));
             client.close();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (RestrictionException e) {
             out.println(Codage.coder(e.getMessage()));
+            try {
+                client.close();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 
     private void proceedAlertResponse(Document document) throws IOException {
         switch (in.readLine()) {
-            case "O":
+            case "O" -> {
                 MailAlert.addToAlertList(document);
                 out.println(Codage.coder("Merci. Un mail sera envoyé lorsque le document n°" + document.numero() + " sera disponible."));
-            case "N":
-                out.println(Codage.coder("Merci de votre visite."));
-            default:
-                out.println(Codage.coder("Réponse non reconnue. Merci de répondre par O (Oui) ou N (Non)."));
+            }
+            case "N" -> out.println(Codage.coder("Merci. Aucune alerte ne sera envoyée en cas de retour du document."));
+            default -> out.println(Codage.coder("Réponse non reconnue. Merci de répondre par O (Oui) ou N (Non)."));
         }
     }
 }
