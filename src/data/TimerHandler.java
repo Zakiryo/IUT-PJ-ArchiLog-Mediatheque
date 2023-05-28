@@ -2,35 +2,20 @@ package data;
 
 import mediatheque.Abonne;
 import mediatheque.Document;
-import tasks.BanClient;
-import tasks.CancelReservation;
-import tasks.UnbanClient;
+import tasks.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TimerHandler {
-    private static final ConcurrentHashMap<Document, TimerData> activeReservations = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Document, TimerData> activeBorrows = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Abonne, TimerData> banList = new ConcurrentHashMap<>();
-
-    public static void validReservation(Document document) {
-        if (activeReservations.containsKey(document)) {
-            activeReservations.get(document).timer().cancel();
-            activeReservations.remove(document);
-        }
-    }
-
-    public static void resetBorrow(Document document) {
-        if (activeBorrows.containsKey(document)) {
-            activeBorrows.get(document).timer().cancel();
-            activeBorrows.remove(document);
-        }
-    }
+    private static final Map<Document, TimerData> activeReservations = new ConcurrentHashMap<>(); // équivalent thread-safe à HashMap
+    private static final Map<Document, TimerData> activeBorrows = new ConcurrentHashMap<>();
+    private static final Map<Abonne, TimerData> banList = new ConcurrentHashMap<>();
 
     public static void reservationTimerTaskStart(Document document) {
         Timer timer = new Timer();
@@ -57,6 +42,20 @@ public class TimerHandler {
         Date scheduledExpirationDate = Date.from(unbanDate.atZone(ZoneId.systemDefault()).toInstant());
         timer.schedule(task, scheduledExpirationDate);
         banList.put(bannedClient, new TimerData(timer, unbanDate));
+    }
+
+    public static void validReservation(Document document) {
+        if (activeReservations.containsKey(document)) {
+            activeReservations.get(document).timer().cancel();
+            activeReservations.remove(document);
+        }
+    }
+
+    public static void resetBorrow(Document document) {
+        if (activeBorrows.containsKey(document)) {
+            activeBorrows.get(document).timer().cancel();
+            activeBorrows.remove(document);
+        }
     }
 
     public static void removeFromReservations(Document document) {

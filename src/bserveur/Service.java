@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public abstract class Service implements Runnable {
@@ -39,38 +38,43 @@ public abstract class Service implements Runnable {
 
     public Abonne checkAbonne() throws IOException {
         int numeroAbonne;
+
         try {
             numeroAbonne = Integer.parseInt(in.readLine());
         } catch (NumberFormatException e) {
-            out.println(Codage.coder("Numéro d'abonné incorrect."));
+            out.println(Codage.coder("Numéro d'abonné incorrect. Merci de retaper le numéro.\n" + "> "));
             return null;
         }
+
         Abonne abonne = DataHandler.getAbonneById(numeroAbonne);
         if (abonne == null) {
-            out.println(Codage.coder("Ce numéro d'abonné n'est pas enregistré."));
+            out.println(Codage.coder("Ce numéro d'abonné n'est pas enregistré. Merci de retaper le numéro.\n" + "> "));
             return null;
         }
+
         if (abonne.isBanned()) {
             LocalDateTime banExpiration = TimerHandler.getUnbanDateTime(abonne);
             out.println(Codage.coder("Cet abonné est banni de la médiathèque jusqu'au "
                     + banExpiration.getDayOfMonth() + "/" + banExpiration.getMonthValue() + "/" + banExpiration.getYear() +
                     " à " + banExpiration.getHour() + "h" + banExpiration.getMinute() + "."));
-            return null;
+            client.close();
         }
         return abonne;
     }
 
     public Document checkDocument() throws IOException {
         int numeroDocument;
+
         try {
             numeroDocument = Integer.parseInt(in.readLine());
         } catch (NumberFormatException e) {
-            out.println(Codage.coder("Numéro de document incorrect."));
+            out.println(Codage.coder("Numéro de document incorrect. Merci de retaper le numéro.\n" + "> "));
             return null;
         }
+
         Document document = DataHandler.getDocumentById(numeroDocument);
         if (document == null) {
-            out.println(Codage.coder("Ce numéro de document n'existe pas."));
+            out.println(Codage.coder("Ce numéro de document n'existe pas. Merci de retaper le numéro.\n" + "> "));
             return null;
         }
         return document;

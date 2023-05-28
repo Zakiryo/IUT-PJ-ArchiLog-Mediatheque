@@ -27,34 +27,35 @@ public class ServiceReservation extends Service implements Runnable {
     @Override
     public void run() {
         try {
-            out.println(Codage.coder("Bienvenue au service de réservation ! Voici notre catalogue :\n" + DataHandler.getCatalogue() + "Veuillez saisir votre numéro d'abonné\n" + "> "));
+            out.println(Codage.coder("Bienvenue au service de réservation ! Voici notre catalogue :\n" + DataHandler.getCatalogue() + "Veuillez saisir votre numéro d'abonné.\n" + "> "));
 
-            Abonne abonne = checkAbonne();
-            if (abonne == null) {
-                client.close();
-                return;
+            Abonne abonne = null;
+            while (abonne == null && !client.isClosed()) {
+                abonne = checkAbonne();
             }
 
-            out.println(Codage.coder("Veuillez maintenant saisir le numéro du document que vous souhaitez réserver\n" + "> "));
+            out.println(Codage.coder("Veuillez maintenant saisir le numéro du document que vous souhaitez réserver.\n" + "> "));
 
-            Document doc = checkDocument();
-            if (doc == null) {
-                client.close();
-                return;
+            Document doc = null;
+            while (doc == null) {
+                doc = checkDocument();
             }
 
             if (doc.reservePar() != null) {
                 LocalDateTime availabilityTime = TimerHandler.getReservationExpirationDate(doc);
                 out.println(Codage.coder("Ce document est réservé jusqu'à " + availabilityTime.getHour() + "h" + availabilityTime.getMinute() + "." +
                         " Souhaitez-vous placer une alerte par mail lorsque celui-ci sera de nouveau disponible ? (O/N)\n" + "> "));
-                proceedAlertResponse(doc);
-                client.close();
+                while (!client.isClosed()) {
+                    proceedAlertResponse(doc);
+                }
                 return;
+
             } else if (doc.empruntePar() != null) {
                 out.println(Codage.coder("Ce document est emprunté." +
                         "Souhaitez-vous placer une alerte par mail lorsque celui-ci sera de nouveau disponible ? (O/N)\n" + "> "));
-                proceedAlertResponse(doc);
-                client.close();
+                while (!client.isClosed()) {
+                    proceedAlertResponse(doc);
+                }
                 return;
             }
 
@@ -64,7 +65,7 @@ public class ServiceReservation extends Service implements Runnable {
             client.close();
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Un utilisateur a interrompu sa connexion avec le serveur.");
         } catch (RestrictionException e) {
             out.println(Codage.coder(e.getMessage()));
             try {
@@ -80,9 +81,14 @@ public class ServiceReservation extends Service implements Runnable {
             case "O" -> {
                 MailAlert.addToAlertList(document);
                 out.println(Codage.coder("Merci. Un mail sera envoyé lorsque le document n°" + document.numero() + " sera disponible."));
+                client.close();
             }
-            case "N" -> out.println(Codage.coder("Merci. Aucune alerte ne sera envoyée en cas de retour du document."));
-            default -> out.println(Codage.coder("Réponse non reconnue. Merci de répondre par O (Oui) ou N (Non)."));
+            case "N" -> {
+                out.println(Codage.coder("Merci. Aucune alerte ne sera envoyée en cas de retour du document."));
+                client.close();
+            }
+            default ->
+                    out.println(Codage.coder("Réponse non reconnue. Merci de répondre par O (Oui) ou N (Non).\n" + "> "));
         }
     }
 }

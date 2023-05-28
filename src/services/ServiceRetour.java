@@ -23,45 +23,57 @@ public class ServiceRetour extends Service implements Runnable {
     @Override
     public void run() {
         try {
-            out.println(Codage.coder("Bienvenue au service de retour !\nVeuillez saisir le numéro du document à retourner\n" + "> "));
+            out.println(Codage.coder("Bienvenue au service de retour !\nVeuillez saisir le numéro du document à retourner.\n" + "> "));
 
-            Document doc = checkDocument();
-            if (doc == null) {
+            Document doc = null;
+            while (doc == null) {
+                doc = checkDocument();
+            }
+
+            if (!isBorrowed(doc)) {
                 client.close();
                 return;
             }
 
-            if (doc.empruntePar() == null && doc.reservePar() == null) {
-                out.println(Codage.coder("Ce document n'est ni réservé ni emprunté."));
-                client.close();
-                return;
-            }
-
-            if (doc.empruntePar() != null) {
-                out.println(Codage.coder("Des dégradations ont-elles été constatées sur le document ? (O/N)\n" + "> "));
+            out.println(Codage.coder("Des dégradations ont-elles été constatées sur le document ? (O/N)\n" + "> "));
+            while (!client.isClosed()) {
                 proceedDegradationResponse(doc);
             }
 
-            client.close();
         } catch (IOException e) {
-            System.out.println("Un utilisateur a interrompu sa connexion avec le serveur. / Une erreur est survenue.");
+            System.err.println("Un utilisateur a interrompu sa connexion avec le serveur.");
         }
+    }
+
+    private boolean isBorrowed(Document document) throws IOException {
+        if (document.empruntePar() == null) {
+            out.println(Codage.coder("Ce document n'est pas emprunté."));
+            return false;
+        }
+        return true;
     }
 
     private void proceedDegradationResponse(Document document) throws IOException {
         switch (in.readLine()) {
             case "O" -> {
-                Abonne emprunteur = document.empruntePar();
-                emprunteur.setBanned(true);
-                TimerHandler.addToBanList(emprunteur);
-                document.retour();
-                out.println(Codage.coder("Suite à cette dégradation, le client n°" + emprunteur.getNumero() + " a été banni du service pendant un mois."));
+                if (isBorrowed(document)) {
+                    Abonne emprunteur = document.empruntePar();
+                    emprunteur.setBanned(true);
+                    TimerHandler.addToBanList(emprunteur);
+                    document.retour();
+                    out.println(Codage.coder("Suite à cette dégradation, le client n°" + emprunteur.getNumero() + " a été banni du service pendant un mois."));
+                    client.close();
+                }
             }
             case "N" -> {
-                document.retour();
-                out.println(Codage.coder("Le document a bien été retourné."));
+                if (isBorrowed(document)) {
+                    document.retour();
+                    out.println(Codage.coder("Le document a bien été retourné."));
+                    client.close();
+                }
             }
-            default -> out.println(Codage.coder("Réponse non reconnue. Merci de répondre par O (Oui) ou N (Non)."));
+            default ->
+                    out.println(Codage.coder("Réponse non reconnue. Merci de répondre par O (Oui) ou N (Non).\n" + "> "));
         }
     }
 }

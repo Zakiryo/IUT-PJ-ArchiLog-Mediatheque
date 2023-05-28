@@ -6,7 +6,6 @@ import data.TimerHandler;
 import exception.RestrictionException;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public abstract class AbstractDocument implements Document {
