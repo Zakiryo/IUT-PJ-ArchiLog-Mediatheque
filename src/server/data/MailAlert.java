@@ -26,14 +26,14 @@ public class MailAlert {
 
             Session session = Session.getInstance(prop, new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication("athomosop@gmail.com", "jccshxiopsaziezo");
+                    return new PasswordAuthentication("mediatheque@gmail.com", "password");
                 }
             });
 
             try {
                 Message message = new MimeMessage(session);
-                message.setFrom(new InternetAddress("athomosop@gmail.com"));
-                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("yohan.rudny@etu.u-paris.fr"));
+                message.setFrom(new InternetAddress("mediatheque@gmail.com"));
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("customer@gmail.com"));
                 message.setSubject("[Médiathèque] Document n°" + doc.numero() + " disponible");
                 message.setText("Salutations, grand Wakan Tanka.\n" +
                         "Nous vous informons par ce signal de fumée que le document n°" + doc.numero() + " peut de nouveau être envouté !\n" +
