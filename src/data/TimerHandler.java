@@ -74,6 +74,6 @@ public class TimerHandler {
         return banList.get(bannedUser).date();
     }
 
-    private record TimerData(Timer timer, LocalDateTime date) {
+    private record TimerData(Timer timer, LocalDateTime date) { // classe Java concise ne comportant que des données immuables
     }
 }

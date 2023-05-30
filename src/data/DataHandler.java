@@ -87,7 +87,7 @@ public final class DataHandler {
                         .append("\n");
             }
         } catch (SQLException e) {
-            System.out.println("Erreur lors de la récupération du catalogue : " + e.getMessage());
+            System.err.println("Erreur lors de la récupération du catalogue : " + e.getMessage());
         }
         return catalogue;
     }

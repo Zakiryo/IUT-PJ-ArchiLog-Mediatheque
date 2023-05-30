@@ -17,10 +17,10 @@ public class Serveur implements Runnable {
     public void run() {
         while (!this.listen_socket.isClosed()) {
             try {
-                (new Thread(this.service.getConstructor(Socket.class).newInstance(this.listen_socket.accept()))).start();
+                new Thread(this.service.getConstructor(Socket.class).newInstance(this.listen_socket.accept())).start();
             } catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException |
                      IOException | InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+                System.err.println("Erreur lors de l'ouverture du serveur : " + e.getMessage());
             }
         }
     }
