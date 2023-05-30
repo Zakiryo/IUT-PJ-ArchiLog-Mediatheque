@@ -1,4 +1,4 @@
-package bttp;
+package librairies.bttp;
 
 public class Codage {
     public static String coder(String message) {

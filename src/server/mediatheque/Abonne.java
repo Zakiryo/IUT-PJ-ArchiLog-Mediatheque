@@ -1,4 +1,4 @@
-package mediatheque;
+package server.mediatheque;
 
 import java.time.LocalDate;
 import java.time.Period;

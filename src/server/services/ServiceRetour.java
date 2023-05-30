@@ -1,10 +1,10 @@
-package services;
+package server.services;
 
-import bserveur.Service;
-import bttp.Codage;
-import data.TimerHandler;
-import mediatheque.Abonne;
-import mediatheque.Document;
+import librairies.bserveur.Service;
+import librairies.bttp.Codage;
+import server.data.TimerHandler;
+import server.mediatheque.Abonne;
+import server.mediatheque.Document;
 
 import java.io.BufferedReader;
 import java.io.IOException;

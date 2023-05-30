@@ -1,9 +1,9 @@
-package mediatheque;
+package server.mediatheque;
 
-import data.DataHandler;
-import data.MailAlert;
-import data.TimerHandler;
-import exception.RestrictionException;
+import server.data.DataHandler;
+import server.data.MailAlert;
+import server.data.TimerHandler;
+import server.exception.RestrictionException;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;

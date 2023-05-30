@@ -1,6 +1,6 @@
-package data;
+package server.data;
 
-import mediatheque.Document;
+import server.mediatheque.Document;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;

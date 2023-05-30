@@ -1,6 +1,6 @@
-package data;
+package server.data;
 
-import mediatheque.*;
+import server.mediatheque.*;
 
 import java.sql.*;
 import java.util.*;

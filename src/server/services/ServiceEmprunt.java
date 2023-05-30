@@ -1,12 +1,12 @@
-package services;
+package server.services;
 
-import bserveur.Service;
-import bttp.Codage;
-import data.TimerHandler;
-import exception.RestrictionException;
-import mediatheque.Abonne;
-import data.DataHandler;
-import mediatheque.Document;
+import librairies.bserveur.Service;
+import librairies.bttp.Codage;
+import server.data.TimerHandler;
+import server.exception.RestrictionException;
+import server.mediatheque.Abonne;
+import server.data.DataHandler;
+import server.mediatheque.Document;
 
 import java.io.IOException;
 import java.io.PrintWriter;

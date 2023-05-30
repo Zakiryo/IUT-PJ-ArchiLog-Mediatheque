@@ -1,6 +1,6 @@
-package mediatheque;
+package server.mediatheque;
 
-import exception.RestrictionException;
+import server.exception.RestrictionException;
 
 public class DVD extends AbstractDocument {
     private final boolean adulte;

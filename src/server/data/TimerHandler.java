@@ -1,8 +1,8 @@
-package data;
+package server.data;
 
-import mediatheque.Abonne;
-import mediatheque.Document;
-import tasks.*;
+import server.mediatheque.Abonne;
+import server.mediatheque.Document;
+import server.tasks.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;

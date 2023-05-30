@@ -1,7 +1,7 @@
-package tasks;
+package server.tasks;
 
-import data.TimerHandler;
-import mediatheque.Abonne;
+import server.data.TimerHandler;
+import server.mediatheque.Abonne;
 
 import java.util.TimerTask;
 
