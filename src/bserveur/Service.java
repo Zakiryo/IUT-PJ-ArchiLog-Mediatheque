@@ -24,19 +24,19 @@ public abstract class Service implements Runnable {
         this.out = new PrintWriter(this.client.getOutputStream(), true);
     }
 
-    public BufferedReader getIn() {
+    protected BufferedReader getIn() {
         return this.in;
     }
 
-    public PrintWriter getOut() {
+    protected PrintWriter getOut() {
         return this.out;
     }
 
-    public Socket getClient() {
+    protected Socket getClient() {
         return this.client;
     }
 
-    public Abonne checkAbonne() throws IOException {
+    protected Abonne checkAbonne() throws IOException {
         int numeroAbonne;
 
         try {
@@ -62,7 +62,7 @@ public abstract class Service implements Runnable {
         return abonne;
     }
 
-    public Document checkDocument() throws IOException {
+    protected Document checkDocument() throws IOException {
         int numeroDocument;
 
         try {
