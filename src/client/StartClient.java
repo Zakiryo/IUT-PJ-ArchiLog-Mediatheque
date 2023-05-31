@@ -1,7 +1,5 @@
 package client;
 
-import librairies.bttp.ClientBttp;
-
 import java.io.IOException;
 import java.util.List;
 

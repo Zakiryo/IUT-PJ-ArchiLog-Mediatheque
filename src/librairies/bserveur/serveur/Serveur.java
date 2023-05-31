@@ -1,4 +1,4 @@
-package librairies.bserveur;
+package librairies.bserveur.serveur;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

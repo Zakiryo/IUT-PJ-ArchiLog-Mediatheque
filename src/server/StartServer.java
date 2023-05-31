@@ -1,6 +1,6 @@
 package server;
 
-import librairies.bserveur.Serveur;
+import librairies.bserveur.serveur.Serveur;
 import server.services.ServiceEmprunt;
 import server.services.ServiceReservation;
 import server.services.ServiceRetour;

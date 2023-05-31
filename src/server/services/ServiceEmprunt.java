@@ -1,7 +1,7 @@
 package server.services;
 
-import librairies.bserveur.Service;
-import librairies.bttp.Codage;
+import librairies.bserveur.serveur.Service;
+import librairies.bttp2.Codage;
 import server.data.TimerHandler;
 import server.exception.RestrictionException;
 import server.mediatheque.Abonne;

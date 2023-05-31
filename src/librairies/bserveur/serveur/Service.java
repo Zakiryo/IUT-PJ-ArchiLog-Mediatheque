@@ -1,6 +1,6 @@
-package librairies.bserveur;
+package librairies.bserveur.serveur;
 
-import librairies.bttp.Codage;
+import librairies.bttp2.Codage;
 import server.data.DataHandler;
 import server.data.TimerHandler;
 import server.mediatheque.Abonne;

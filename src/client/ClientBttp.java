@@ -1,4 +1,6 @@
-package librairies.bttp;
+package client;
+
+import librairies.bttp2.Codage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
